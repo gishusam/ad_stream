@@ -29,3 +29,6 @@ consume-test:
 		--bootstrap-server localhost:9092 \
 		--topic ad.impressions.raw \
 		--from-beginning
+
+test:
+    python -m pytest tests/test_models.py tests/test_producers.py tests/test_consumers.py -v --tb=short	

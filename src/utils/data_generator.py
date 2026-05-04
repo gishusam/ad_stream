@@ -57,7 +57,7 @@ class AdStreamDataGenerator:
             user_id = f"bot_{random.randint(1, 10):03d}"
             bid_price = round(random.uniform(5.0, 15.0), 6)   # unusually high
         else:
-            user_id = fake.uuid4()
+            user_id = f"user_{random.randint(0, 999):06d}"
             bid_price = round(random.uniform(0.01, 2.50), 6)  # normal range
 
         impression = ImpressionEvent(

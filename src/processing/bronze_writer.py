@@ -7,6 +7,7 @@ from pyspark.sql import functions as F
 from delta import configure_spark_with_delta_pip
 from src.models.events import ImpressionEvent
 from src.utils.logger import get_logger
+from datetime import datetime
 import os
 
 logger = get_logger("bronze_writer")
@@ -96,7 +97,15 @@ class BronzeWriter:
             return 0
 
         # Convert Pydantic models to plain dicts
-        rows = [event.model_dump(mode="json") for event in events]
+        rows= []
+
+        for event in events:
+            row = event.model_dump(mode="json")
+         # Convert timestamp string back to datetime object for Spark
+            row["timestamp"] = datetime.fromisoformat(
+                row["timestamp"].replace("Z", "+00:00")
+            )
+            rows.append(row)
 
         # Create DataFrame with explicit schema
         df: DataFrame = self.spark.createDataFrame(rows, schema=IMPRESSION_SCHEMA)

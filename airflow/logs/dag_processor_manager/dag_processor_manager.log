@@ -1,0 +1,165 @@
+[2026-05-11T11:25:05.614+0300] {manager.py:483} INFO - Processing files using up to 1 processes at a time 
+[2026-05-11T11:25:05.614+0300] {manager.py:484} INFO - Process each file at most once every 30 seconds
+[2026-05-11T11:25:05.614+0300] {manager.py:485} INFO - Checking for new files in /Users/samwelngugi/Documents/adstream/airflow/dags every 300 seconds
+[2026-05-11T11:25:05.614+0300] {manager.py:821} INFO - Searching for files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:25:05.619+0300] {manager.py:824} INFO - There are 1 files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:25:07.295+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  1.62s           2026-05-11T08:25:07                      45
+================================================================================
+[2026-05-11T11:25:40.533+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  2.96s           2026-05-11T08:25:40                      12
+================================================================================
+[2026-05-11T11:26:13.666+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  2.83s           2026-05-11T08:26:13                      12
+================================================================================
+[2026-05-11T11:26:46.929+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  2.99s           2026-05-11T08:26:46                      12
+================================================================================
+[2026-05-11T11:27:26.909+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  9.62s           2026-05-11T08:27:26                      12
+================================================================================
+[2026-05-11T11:28:00.256+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  2.97s           2026-05-11T08:28:00                      12
+================================================================================
+[2026-05-11T11:33:17.524+0300] {manager.py:465} INFO - Exiting gracefully upon receiving signal 15
+[2026-05-11T11:33:19.474+0300] {manager.py:483} INFO - Processing files using up to 1 processes at a time 
+[2026-05-11T11:33:19.474+0300] {manager.py:484} INFO - Process each file at most once every 30 seconds
+[2026-05-11T11:33:19.475+0300] {manager.py:485} INFO - Checking for new files in /Users/samwelngugi/Documents/adstream/airflow/dags every 300 seconds
+[2026-05-11T11:33:19.475+0300] {manager.py:821} INFO - Searching for files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:33:19.476+0300] {manager.py:824} INFO - There are 1 files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:33:20.695+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  1.17s           2026-05-11T08:33:20                      12
+================================================================================
+[2026-05-11T11:35:23.046+0300] {manager.py:465} INFO - Exiting gracefully upon receiving signal 15
+[2026-05-11T11:35:25.917+0300] {manager.py:483} INFO - Processing files using up to 1 processes at a time 
+[2026-05-11T11:35:25.917+0300] {manager.py:484} INFO - Process each file at most once every 30 seconds
+[2026-05-11T11:35:25.917+0300] {manager.py:485} INFO - Checking for new files in /Users/samwelngugi/Documents/adstream/airflow/dags every 300 seconds
+[2026-05-11T11:35:25.917+0300] {manager.py:821} INFO - Searching for files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:35:25.919+0300] {manager.py:824} INFO - There are 1 files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:35:27.158+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  1.17s           2026-05-11T08:35:27                      12
+================================================================================
+[2026-05-11T11:38:02.975+0300] {manager.py:465} INFO - Exiting gracefully upon receiving signal 15
+[2026-05-11T11:38:04.746+0300] {manager.py:483} INFO - Processing files using up to 1 processes at a time 
+[2026-05-11T11:38:04.746+0300] {manager.py:484} INFO - Process each file at most once every 30 seconds
+[2026-05-11T11:38:04.746+0300] {manager.py:485} INFO - Checking for new files in /Users/samwelngugi/Documents/adstream/airflow/dags every 300 seconds
+[2026-05-11T11:38:04.747+0300] {manager.py:821} INFO - Searching for files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:38:04.748+0300] {manager.py:824} INFO - There are 1 files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:38:06.852+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  2.04s           2026-05-11T08:38:06                      12
+================================================================================
+[2026-05-11T11:39:29.258+0300] {manager.py:465} INFO - Exiting gracefully upon receiving signal 15
+[2026-05-11T11:39:38.647+0300] {manager.py:483} INFO - Processing files using up to 1 processes at a time 
+[2026-05-11T11:39:38.647+0300] {manager.py:484} INFO - Process each file at most once every 30 seconds
+[2026-05-11T11:39:38.648+0300] {manager.py:485} INFO - Checking for new files in /Users/samwelngugi/Documents/adstream/airflow/dags every 300 seconds
+[2026-05-11T11:39:38.648+0300] {manager.py:821} INFO - Searching for files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:39:38.652+0300] {manager.py:824} INFO - There are 1 files in /Users/samwelngugi/Documents/adstream/airflow/dags
+[2026-05-11T11:39:43.252+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  4.47s           2026-05-11T08:39:43                      12
+================================================================================
+[2026-05-11T11:40:16.386+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  2.67s           2026-05-11T08:40:16                      12
+================================================================================
+[2026-05-11T11:40:52.537+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  5.74s           2026-05-11T08:40:52                      12
+================================================================================
+[2026-05-11T11:41:27.526+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  4.78s           2026-05-11T08:41:27                      12
+================================================================================
+[2026-05-11T11:42:04.260+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  6.50s           2026-05-11T08:42:04                      12
+================================================================================
+[2026-05-11T11:42:39.217+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  4.71s           2026-05-11T08:42:39                      12
+================================================================================
+[2026-05-11T11:43:12.628+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  3.29s           2026-05-11T08:43:12                      12
+================================================================================
+[2026-05-11T11:43:46.151+0300] {manager.py:997} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                                                    PID    Runtime      # DAGs    # Errors  Last Runtime    Last Run               Last # of DB Queries
+---------------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  -------------------  ----------------------
+/Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py                           1           0  3.37s           2026-05-11T08:43:46                      12
+================================================================================

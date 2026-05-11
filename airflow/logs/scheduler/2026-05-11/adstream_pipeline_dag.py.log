@@ -1,0 +1,127 @@
+[2026-05-11T11:25:06.667+0300] {processor.py:186} INFO - Started process (PID=56509) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:25:06.668+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:25:06.668+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.668+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:25:06.730+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:25:06.866+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.866+0300] {override.py:1932} INFO - Created Permission View: can edit on DAG:adstream_pipeline
+[2026-05-11T11:25:06.873+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.873+0300] {override.py:1932} INFO - Created Permission View: can delete on DAG:adstream_pipeline
+[2026-05-11T11:25:06.876+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.876+0300] {override.py:1932} INFO - Created Permission View: can read on DAG:adstream_pipeline
+[2026-05-11T11:25:06.881+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.881+0300] {override.py:1932} INFO - Created Permission View: can delete on DAG Run:adstream_pipeline
+[2026-05-11T11:25:06.887+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.887+0300] {override.py:1932} INFO - Created Permission View: can create on DAG Run:adstream_pipeline
+[2026-05-11T11:25:06.891+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.891+0300] {override.py:1932} INFO - Created Permission View: menu access on DAG Run:adstream_pipeline
+[2026-05-11T11:25:06.896+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.895+0300] {override.py:1932} INFO - Created Permission View: can read on DAG Run:adstream_pipeline
+[2026-05-11T11:25:06.897+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.896+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:25:06.903+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.903+0300] {dag.py:3262} INFO - Creating ORM DAG for adstream_pipeline
+[2026-05-11T11:25:06.908+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:06.908+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 07:00:00+00:00, run_after=2026-05-11 08:00:00+00:00
+[2026-05-11T11:25:06.921+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.257 seconds
+[2026-05-11T11:25:39.902+0300] {processor.py:186} INFO - Started process (PID=56599) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:25:39.905+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:25:39.907+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:39.907+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:25:40.025+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:25:40.109+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:40.108+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:25:40.124+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:25:40.124+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 07:00:00+00:00, run_after=2026-05-11 08:00:00+00:00
+[2026-05-11T11:25:40.140+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.243 seconds
+[2026-05-11T11:26:13.024+0300] {processor.py:186} INFO - Started process (PID=56701) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:26:13.028+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:26:13.031+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:26:13.031+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:26:13.258+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:26:13.312+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:26:13.311+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:26:13.326+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:26:13.326+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 07:00:00+00:00, run_after=2026-05-11 08:00:00+00:00
+[2026-05-11T11:26:13.334+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.311 seconds
+[2026-05-11T11:26:46.195+0300] {processor.py:186} INFO - Started process (PID=56803) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:26:46.198+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:26:46.203+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:26:46.203+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:26:46.351+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:26:46.425+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:26:46.424+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:26:46.440+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:26:46.440+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 07:00:00+00:00, run_after=2026-05-11 08:00:00+00:00
+[2026-05-11T11:26:46.460+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.268 seconds
+[2026-05-11T11:27:26.031+0300] {processor.py:186} INFO - Started process (PID=56902) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:27:26.035+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:27:26.040+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:27:26.040+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:27:26.205+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:27:26.344+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:27:26.344+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:27:26.368+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:27:26.368+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 07:00:00+00:00, run_after=2026-05-11 08:00:00+00:00
+[2026-05-11T11:27:26.406+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.381 seconds
+[2026-05-11T11:27:59.591+0300] {processor.py:186} INFO - Started process (PID=57010) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:27:59.593+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:27:59.595+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:27:59.594+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:27:59.685+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:27:59.742+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:27:59.742+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:27:59.756+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:27:59.756+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 07:00:00+00:00, run_after=2026-05-11 08:00:00+00:00
+[2026-05-11T11:27:59.768+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.185 seconds
+[2026-05-11T11:33:20.297+0300] {processor.py:186} INFO - Started process (PID=58034) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:33:20.298+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:33:20.299+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:33:20.299+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:33:20.341+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:33:20.378+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:33:20.378+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:33:20.389+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:33:20.389+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:33:20.397+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.102 seconds
+[2026-05-11T11:35:26.831+0300] {processor.py:186} INFO - Started process (PID=58538) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:35:26.832+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:35:26.833+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:35:26.833+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:35:26.883+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:35:26.921+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:35:26.921+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:35:26.930+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:35:26.930+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:35:26.938+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.109 seconds
+[2026-05-11T11:38:06.325+0300] {processor.py:186} INFO - Started process (PID=59157) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:38:06.327+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:38:06.328+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:38:06.328+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:38:06.403+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:38:06.473+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:38:06.472+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:38:06.488+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:38:06.488+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:38:06.506+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.188 seconds
+[2026-05-11T11:39:42.519+0300] {processor.py:186} INFO - Started process (PID=59507) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:39:42.526+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:39:42.530+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:39:42.530+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:39:42.673+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:39:42.761+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:39:42.760+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:39:42.778+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:39:42.777+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:39:42.798+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.284 seconds
+[2026-05-11T11:40:15.808+0300] {processor.py:186} INFO - Started process (PID=59621) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:40:15.810+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:40:15.811+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:40:15.811+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:40:16.044+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:40:16.091+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:40:16.091+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:40:16.100+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:40:16.100+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:40:16.111+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.305 seconds
+[2026-05-11T11:40:51.874+0300] {processor.py:186} INFO - Started process (PID=59748) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:40:51.877+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:40:51.880+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:40:51.879+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:40:52.012+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:40:52.073+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:40:52.072+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:40:52.088+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:40:52.088+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:40:52.102+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.234 seconds
+[2026-05-11T11:41:26.814+0300] {processor.py:186} INFO - Started process (PID=59852) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:41:26.818+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:41:26.820+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:41:26.820+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:41:26.932+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:41:27.016+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:41:27.016+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:41:27.036+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:41:27.036+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:41:27.059+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.254 seconds
+[2026-05-11T11:42:03.311+0300] {processor.py:186} INFO - Started process (PID=59947) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:42:03.318+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:42:03.320+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:42:03.320+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:42:03.478+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:42:03.588+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:42:03.587+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:42:03.620+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:42:03.620+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:42:03.646+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.342 seconds
+[2026-05-11T11:42:38.686+0300] {processor.py:186} INFO - Started process (PID=60046) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:42:38.687+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:42:38.689+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:42:38.688+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:42:38.782+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:42:38.868+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:42:38.867+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:42:38.882+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:42:38.882+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:42:38.902+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.222 seconds
+[2026-05-11T11:43:11.954+0300] {processor.py:186} INFO - Started process (PID=60140) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:43:11.956+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:43:11.960+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:43:11.959+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:43:12.096+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:43:12.189+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:43:12.188+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:43:12.207+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:43:12.207+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:43:12.228+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.284 seconds
+[2026-05-11T11:43:45.404+0300] {processor.py:186} INFO - Started process (PID=60278) to work on /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:43:45.406+0300] {processor.py:914} INFO - Processing file /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py for tasks to queue
+[2026-05-11T11:43:45.408+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:43:45.408+0300] {dagbag.py:588} INFO - Filling up the DagBag from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:43:45.599+0300] {processor.py:925} INFO - DAG(s) 'adstream_pipeline' retrieved from /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py
+[2026-05-11T11:43:45.685+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:43:45.684+0300] {dag.py:3239} INFO - Sync 1 DAGs
+[2026-05-11T11:43:45.701+0300] {logging_mixin.py:190} INFO - [2026-05-11T11:43:45.701+0300] {dag.py:4180} INFO - Setting next_dagrun for adstream_pipeline to 2026-05-11 08:00:00+00:00, run_after=2026-05-11 09:00:00+00:00
+[2026-05-11T11:43:45.736+0300] {processor.py:208} INFO - Processing /Users/samwelngugi/Documents/adstream/airflow/dags/adstream_pipeline_dag.py took 0.341 seconds

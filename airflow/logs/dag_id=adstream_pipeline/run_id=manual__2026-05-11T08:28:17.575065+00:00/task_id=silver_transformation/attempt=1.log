@@ -1,0 +1,34 @@
+[2026-05-11T11:34:14.642+0300] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-05-11T11:34:14.651+0300] {taskinstance.py:2631} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: adstream_pipeline.silver_transformation manual__2026-05-11T08:28:17.575065+00:00 [queued]>
+[2026-05-11T11:34:14.654+0300] {taskinstance.py:2631} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: adstream_pipeline.silver_transformation manual__2026-05-11T08:28:17.575065+00:00 [queued]>
+[2026-05-11T11:34:14.655+0300] {taskinstance.py:2884} INFO - Starting attempt 1 of 2
+[2026-05-11T11:34:14.660+0300] {taskinstance.py:2907} INFO - Executing <Task(PythonOperator): silver_transformation> on 2026-05-11 08:28:17.575065+00:00
+[2026-05-11T11:34:14.675+0300] {logging_mixin.py:190} WARNING - /Users/samwelngugi/Documents/adstream/venv/lib/python3.13/site-packages/airflow/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=58293) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-05-11T11:34:14.678+0300] {standard_task_runner.py:72} INFO - Started process 58302 to run task
+[2026-05-11T11:34:14.676+0300] {standard_task_runner.py:104} INFO - Running: ['airflow', 'tasks', 'run', 'adstream_pipeline', 'silver_transformation', 'manual__2026-05-11T08:28:17.575065+00:00', '--job-id', '5', '--raw', '--subdir', 'DAGS_FOLDER/adstream_pipeline_dag.py', '--cfg-path', '/var/folders/x1/w6p41sqj10d_f29z5v92fn5w0000gn/T/tmp85ef7u1j']
+[2026-05-11T11:34:14.680+0300] {standard_task_runner.py:105} INFO - Job 5: Subtask silver_transformation
+[2026-05-11T11:34:14.711+0300] {task_command.py:467} INFO - Running <TaskInstance: adstream_pipeline.silver_transformation manual__2026-05-11T08:28:17.575065+00:00 [running]> on host samwels-macbook-air.local
+[2026-05-11T11:34:14.751+0300] {taskinstance.py:3157} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='adstream' AIRFLOW_CTX_DAG_ID='adstream_pipeline' AIRFLOW_CTX_TASK_ID='silver_transformation' AIRFLOW_CTX_EXECUTION_DATE='2026-05-11T08:28:17.575065+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-05-11T08:28:17.575065+00:00'
+[2026-05-11T11:34:14.752+0300] {taskinstance.py:740} INFO - ::endgroup::
+[2026-05-11T11:34:14.765+0300] {adstream_pipeline_dag.py:67} INFO - {"task": "silver_ingestion", "event": "airflow_task_started", "level": "info", "logger": "adstream_dag", "timestamp": "2026-05-11T08:34:14.764979Z"}
+[2026-05-11T11:34:19.405+0300] {user_profiles.py:70} INFO - {"total": 1000, "schema": "StructType([StructField('user_id', StringType(), False), StructField('account_tier', StringType(), False), StructField('registration_country', StringType(), False), StructField('preferred_currency', StringType(), False), StructField('is_verified', BooleanType(), False), StructField('created_at', TimestampType(), False)])", "event": "user_profiles_generated", "level": "info", "logger": "user_profiles", "timestamp": "2026-05-11T08:34:19.405751Z"}
+[2026-05-11T11:34:19.407+0300] {silver_ingestion.py:40} INFO - {"event": "silver_pipeline_ready", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:34:19.407221Z"}
+[2026-05-11T11:34:19.407+0300] {silver_ingestion.py:104} INFO - {"event": "silver_ingestion_started", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:34:19.407527Z"}
+[2026-05-11T11:34:30.526+0300] {silver_ingestion.py:45} INFO - {"rows": 600, "event": "bronze_read", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:34:30.525341Z"}
+[2026-05-11T11:34:31.093+0300] {silver_transformer.py:216} INFO - {"input_rows": 600, "event": "silver_transformation_started", "level": "info", "logger": "silver_transformer", "timestamp": "2026-05-11T08:34:31.092699Z"}
+[2026-05-11T11:34:33.750+0300] {silver_transformer.py:55} INFO - {"before": 600, "after": 600, "duplicates_removed": 0, "event": "deduplication_complete", "level": "info", "logger": "silver_transformer", "timestamp": "2026-05-11T08:34:33.749991Z"}
+[2026-05-11T11:34:35.007+0300] {silver_transformer.py:115} INFO - {"clean": 600, "quarantined": 0, "event": "quality_check_complete", "level": "info", "logger": "silver_transformer", "timestamp": "2026-05-11T08:34:35.007582Z"}
+[2026-05-11T11:34:38.146+0300] {silver_transformer.py:166} INFO - {"total": 600, "missing_profiles": 22, "event": "enrichment_complete", "level": "info", "logger": "silver_transformer", "timestamp": "2026-05-11T08:34:38.145559Z"}
+[2026-05-11T11:34:42.752+0300] {silver_transformer.py:192} INFO - {"legitimate": 578, "fraud": 22, "fraud_rate": 0.0367, "event": "fraud_split_complete", "level": "info", "logger": "silver_transformer", "timestamp": "2026-05-11T08:34:42.743166Z"}
+[2026-05-11T11:34:45.573+0300] {silver_transformer.py:233} INFO - {"legitimate": 578, "fraud": 22, "quarantined": 0, "event": "silver_transformation_complete", "level": "info", "logger": "silver_transformer", "timestamp": "2026-05-11T08:34:45.573403Z"}
+[2026-05-11T11:34:45.579+0300] {silver_ingestion.py:64} INFO - {"event": "writing_silver_tables", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:34:45.579739Z"}
+[2026-05-11T11:34:57.342+0300] {silver_ingestion.py:73} INFO - {"path": "data/silver/impressions/legitimate", "event": "silver_legitimate_written", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:34:57.341258Z"}
+[2026-05-11T11:35:14.865+0300] {silver_ingestion.py:85} INFO - {"path": "data/silver/impressions/fraud", "event": "silver_fraud_written", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:35:14.849872Z"}
+[2026-05-11T11:35:19.850+0300] {silver_ingestion.py:117} INFO - {"legitimate": 578, "fraud": 22, "quarantined": 0, "event": "silver_ingestion_complete", "level": "info", "logger": "silver_ingestion", "timestamp": "2026-05-11T08:35:19.846871Z"}
+[2026-05-11T11:35:19.880+0300] {adstream_pipeline_dag.py:74} INFO - {"task": "silver_ingestion", "event": "airflow_task_complete", "level": "info", "logger": "adstream_dag", "timestamp": "2026-05-11T08:35:19.875987Z"}
+[2026-05-11T11:35:19.922+0300] {python.py:240} INFO - Done. Returned value was: None
+[2026-05-11T11:35:20.245+0300] {taskinstance.py:349} INFO - ::group::Post task execution logs
+[2026-05-11T11:35:20.249+0300] {taskinstance.py:361} INFO - Marking task as SUCCESS. dag_id=adstream_pipeline, task_id=silver_transformation, run_id=manual__2026-05-11T08:28:17.575065+00:00, execution_date=20260511T082817, start_date=20260511T083414, end_date=20260511T083520
+[2026-05-11T11:35:20.439+0300] {local_task_job_runner.py:266} INFO - Task exited with return code 0
+[2026-05-11T11:35:20.983+0300] {taskinstance.py:3924} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-05-11T11:35:20.987+0300] {local_task_job_runner.py:245} INFO - ::endgroup::

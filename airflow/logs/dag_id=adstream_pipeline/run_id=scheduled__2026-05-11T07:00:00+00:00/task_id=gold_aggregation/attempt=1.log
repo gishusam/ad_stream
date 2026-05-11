@@ -1,0 +1,30 @@
+[2026-05-11T11:35:28.189+0300] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-05-11T11:35:28.202+0300] {taskinstance.py:2631} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: adstream_pipeline.gold_aggregation scheduled__2026-05-11T07:00:00+00:00 [queued]>
+[2026-05-11T11:35:28.208+0300] {taskinstance.py:2631} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: adstream_pipeline.gold_aggregation scheduled__2026-05-11T07:00:00+00:00 [queued]>
+[2026-05-11T11:35:28.209+0300] {taskinstance.py:2884} INFO - Starting attempt 1 of 2
+[2026-05-11T11:35:28.214+0300] {taskinstance.py:2907} INFO - Executing <Task(PythonOperator): gold_aggregation> on 2026-05-11 07:00:00+00:00
+[2026-05-11T11:35:28.225+0300] {logging_mixin.py:190} WARNING - /Users/samwelngugi/Documents/adstream/venv/lib/python3.13/site-packages/airflow/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=58543) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-05-11T11:35:28.226+0300] {standard_task_runner.py:72} INFO - Started process 58555 to run task
+[2026-05-11T11:35:28.233+0300] {standard_task_runner.py:104} INFO - Running: ['airflow', 'tasks', 'run', 'adstream_pipeline', 'gold_aggregation', 'scheduled__2026-05-11T07:00:00+00:00', '--job-id', '6', '--raw', '--subdir', 'DAGS_FOLDER/adstream_pipeline_dag.py', '--cfg-path', '/var/folders/x1/w6p41sqj10d_f29z5v92fn5w0000gn/T/tmpmyegefny']
+[2026-05-11T11:35:28.236+0300] {standard_task_runner.py:105} INFO - Job 6: Subtask gold_aggregation
+[2026-05-11T11:35:28.265+0300] {task_command.py:467} INFO - Running <TaskInstance: adstream_pipeline.gold_aggregation scheduled__2026-05-11T07:00:00+00:00 [running]> on host samwels-macbook-air.local
+[2026-05-11T11:35:28.296+0300] {taskinstance.py:3157} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='adstream' AIRFLOW_CTX_DAG_ID='adstream_pipeline' AIRFLOW_CTX_TASK_ID='gold_aggregation' AIRFLOW_CTX_EXECUTION_DATE='2026-05-11T07:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-05-11T07:00:00+00:00'
+[2026-05-11T11:35:28.297+0300] {taskinstance.py:740} INFO - ::endgroup::
+[2026-05-11T11:35:28.315+0300] {adstream_pipeline_dag.py:83} INFO - {"task": "gold_ingestion", "event": "airflow_task_started", "level": "info", "logger": "adstream_dag", "timestamp": "2026-05-11T08:35:28.315291Z"}
+[2026-05-11T11:35:31.798+0300] {gold_ingestion.py:41} INFO - {"event": "gold_pipeline_ready", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:35:31.798147Z"}
+[2026-05-11T11:35:31.800+0300] {gold_ingestion.py:87} INFO - {"event": "gold_ingestion_started", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:35:31.800168Z"}
+[2026-05-11T11:35:48.028+0300] {gold_ingestion.py:55} INFO - {"legitimate": 578, "fraud": 22, "event": "silver_read", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:35:48.025187Z"}
+[2026-05-11T11:35:51.383+0300] {gold_aggregator.py:95} INFO - {"rows": 40, "metric": "revenue_by_advertiser", "event": "revenue_aggregation_complete", "level": "info", "logger": "gold_aggregator", "timestamp": "2026-05-11T08:35:51.381930Z"}
+[2026-05-11T11:35:54.485+0300] {gold_aggregator.py:218} INFO - {"rows": 177, "metric": "content_performance", "event": "content_aggregation_complete", "level": "info", "logger": "gold_aggregator", "timestamp": "2026-05-11T08:35:54.483338Z"}
+[2026-05-11T11:35:56.566+0300] {gold_aggregator.py:290} INFO - {"rows": 2, "metric": "fraud_summary", "event": "fraud_aggregation_complete", "level": "info", "logger": "gold_aggregator", "timestamp": "2026-05-11T08:35:56.564830Z"}
+[2026-05-11T11:36:17.738+0300] {gold_ingestion.py:78} INFO - {"table": "revenue_by_advertiser", "path": "data/gold/revenue_by_advertiser", "rows": 40, "event": "gold_table_written", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:36:17.722412Z"}
+[2026-05-11T11:36:31.637+0300] {gold_ingestion.py:78} INFO - {"table": "content_performance", "path": "data/gold/content_performance", "rows": 177, "event": "gold_table_written", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:36:31.635185Z"}
+[2026-05-11T11:36:40.094+0300] {gold_ingestion.py:78} INFO - {"table": "fraud_summary", "path": "data/gold/fraud_summary", "rows": 2, "event": "gold_table_written", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:36:40.087036Z"}
+[2026-05-11T11:36:43.456+0300] {gold_ingestion.py:108} INFO - {"revenue_rows": 40, "content_rows": 177, "fraud_rows": 2, "event": "gold_ingestion_complete", "level": "info", "logger": "gold_ingestion", "timestamp": "2026-05-11T08:36:43.448316Z"}
+[2026-05-11T11:36:43.530+0300] {adstream_pipeline_dag.py:90} INFO - {"task": "gold_ingestion", "event": "airflow_task_complete", "level": "info", "logger": "adstream_dag", "timestamp": "2026-05-11T08:36:43.523731Z"}
+[2026-05-11T11:36:43.706+0300] {python.py:240} INFO - Done. Returned value was: None
+[2026-05-11T11:36:44.780+0300] {taskinstance.py:349} INFO - ::group::Post task execution logs
+[2026-05-11T11:36:44.783+0300] {taskinstance.py:361} INFO - Marking task as SUCCESS. dag_id=adstream_pipeline, task_id=gold_aggregation, run_id=scheduled__2026-05-11T07:00:00+00:00, execution_date=20260511T070000, start_date=20260511T083528, end_date=20260511T083644
+[2026-05-11T11:36:44.866+0300] {local_task_job_runner.py:266} INFO - Task exited with return code 0
+[2026-05-11T11:36:44.947+0300] {taskinstance.py:3924} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-05-11T11:36:44.950+0300] {local_task_job_runner.py:245} INFO - ::endgroup::

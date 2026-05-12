@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdStream — Revenue Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:       #080810;
+  --s1:       #0e0e1a;
+  --s2:       #161625;
+  --border:   rgba(255,255,255,0.06);
+  --accent:   #00e5a0;
+  --blue:     #3d9eff;
+  --red:      #ff4d6d;
+  --yellow:   #ffd166;
+  --purple:   #b66dff;
+  --text:     #dde0f0;
+  --muted:    #5a5a78;
+  --fh:       'Syne', sans-serif;
+  --fm:       'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--fm);
+  min-height: 100vh;
+}
+
+/* Subtle grid */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.page { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 36px 40px 60px; }
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 28px; margin-bottom: 36px;
+  border-bottom: 1px solid var(--border);
+}
+.brand h1 {
+  font-family: var(--fh); font-size: 2rem; font-weight: 800;
+  letter-spacing: -0.04em; line-height: 1;
+  background: linear-gradient(120deg, var(--accent) 0%, var(--blue) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.brand p { font-size: 0.68rem; color: var(--muted); margin-top: 5px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.header-right { display: flex; align-items: center; gap: 20px; }
+
+.pipeline-steps { display: flex; align-items: center; gap: 6px; }
+.step {
+  font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border);
+  color: var(--muted);
+}
+.step.done { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,0.06); }
+.step-arrow { color: var(--muted); font-size: 0.7rem; }
+
+.live-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 100px; padding: 7px 14px;
+  font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em;
+}
+.dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── STAT CARDS ── */
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+
+.stat {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 10px;
+  padding: 20px 18px; position: relative; overflow: hidden;
+  animation: up 0.5s ease both;
+}
+.stat::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--c, var(--accent));
+}
+.stat:nth-child(1) { --c: var(--accent); animation-delay: 0.05s; }
+.stat:nth-child(2) { --c: var(--blue);   animation-delay: 0.10s; }
+.stat:nth-child(3) { --c: var(--red);    animation-delay: 0.15s; }
+.stat:nth-child(4) { --c: var(--yellow); animation-delay: 0.20s; }
+.stat:nth-child(5) { --c: var(--purple); animation-delay: 0.25s; }
+
+.stat-label { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+.stat-val { font-family: var(--fh); font-size: 1.9rem; font-weight: 700; line-height: 1; }
+.stat-sub { font-size: 0.62rem; color: var(--muted); margin-top: 7px; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 10px;
+  padding: 22px; animation: up 0.55s ease both;
+}
+.ph { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.pt { font-family: var(--fh); font-size: 0.88rem; font-weight: 600; }
+.tag {
+  font-size: 0.6rem; color: var(--muted); background: var(--s2);
+  border: 1px solid var(--border); border-radius: 100px;
+  padding: 3px 9px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+
+/* ── GRIDS ── */
+.g2   { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 16px; }
+.g3   { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.g1   { margin-bottom: 16px; }
+
+canvas { max-height: 260px; }
+
+/* ── FRAUD PANEL ── */
+.fraud-panel { background: linear-gradient(135deg, #150d10, #0e0e1a); border-color: rgba(255,77,109,0.15); }
+.frow { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.frow:last-child { border-bottom: none; }
+.frow-lbl { font-size: 0.66rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; }
+.frow-val { font-family: var(--fh); font-size: 1.1rem; font-weight: 700; }
+.c-red    { color: var(--red); }
+.c-yellow { color: var(--yellow); }
+.c-green  { color: var(--accent); }
+.c-blue   { color: var(--blue); }
+
+/* ── TABLE ── */
+table { width: 100%; border-collapse: collapse; font-size: 0.73rem; }
+th { text-align: left; color: var(--muted); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; padding: 0 10px 10px 0; }
+td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover td { color: var(--accent); }
+
+.rank-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; background: var(--s2); border-radius: 4px;
+  font-size: 0.6rem; color: var(--muted);
+}
+
+.badge {
+  display: inline-block; padding: 2px 7px; border-radius: 100px; font-size: 0.6rem; font-weight: 500;
+}
+.b-mobile  { background: rgba(0,229,160,0.1);  color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+.b-desktop { background: rgba(61,158,255,0.1); color: var(--blue);   border: 1px solid rgba(61,158,255,0.2); }
+.b-ctv     { background: rgba(182,109,255,0.1);color: var(--purple); border: 1px solid rgba(182,109,255,0.2); }
+.b-tablet  { background: rgba(255,209,102,0.1);color: var(--yellow); border: 1px solid rgba(255,209,102,0.2); }
+
+/* ── FOOTER ── */
+footer {
+  margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.65rem; color: var(--muted);
+}
+.stack-tags { display: flex; gap: 8px; }
+.stag {
+  padding: 3px 10px; border-radius: 100px; border: 1px solid var(--border);
+  font-size: 0.6rem; letter-spacing: 0.06em;
+}
+
+@keyframes up { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <h1>AdStream</h1>
+    <p>Revenue Intelligence Platform — Gold Layer Dashboard</p>
+  </div>
+  <div class="header-right">
+    <div class="pipeline-steps">
+      <span class="step done">Bronze</span>
+      <span class="step-arrow">→</span>
+      <span class="step done">Silver</span>
+      <span class="step-arrow">→</span>
+      <span class="step done">Gold</span>
+    </div>
+    <div class="live-pill"><span class="dot"></span> DELTA LAKE · PYSPARK · KAFKA</div>
+  </div>
+</header>
+
+<!-- STAT CARDS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-val">$945.82</div>
+    <div class="stat-sub">All advertisers · all hours</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Impressions Served</div>
+    <div class="stat-val">773</div>
+    <div class="stat-sub">Legitimate events only</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Fraud Caught</div>
+    <div class="stat-val">27</div>
+    <div class="stat-sub">Events flagged · 2 days</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Revenue Protected</div>
+    <div class="stat-val">$278.30</div>
+    <div class="stat-sub">Fraud prevention value</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Active Content</div>
+    <div class="stat-val">100</div>
+    <div class="stat-sub">Unique content pieces</div>
+  </div>
+</div>
+
+<!-- ROW 1 -->
+<div class="g2">
+  <div class="panel">
+    <div class="ph"><span class="pt">Advertiser Spend Ranking</span><span class="tag">Gold · Revenue</span></div>
+    <canvas id="revChart"></canvas>
+  </div>
+  <div class="panel fraud-panel">
+    <div class="ph"><span class="pt">Fraud Prevention Summary</span><span class="tag">Gold · Fraud</span></div>
+    <div class="frow"><span class="frow-lbl">Total Fraud Events</span><span class="frow-val c-red">27</span></div>
+    <div class="frow"><span class="frow-lbl">Revenue at Risk</span><span class="frow-val c-red">$278.30</span></div>
+    <div class="frow"><span class="frow-lbl">Avg Fraud Bid Price</span><span class="frow-val c-yellow">$10.49</span></div>
+    <div class="frow"><span class="frow-lbl">Advertisers Targeted</span><span class="frow-val c-yellow">14</span></div>
+    <div class="frow"><span class="frow-lbl">Countries Affected</span><span class="frow-val c-yellow">9</span></div>
+    <div class="frow"><span class="frow-lbl">Most Targeted</span><span class="frow-val c-green">adv_011</span></div>
+    <div class="frow"><span class="frow-lbl">Fraud Days Tracked</span><span class="frow-val c-blue">2</span></div>
+  </div>
+</div>
+
+<!-- ROW 2 -->
+<div class="g3">
+  <div class="panel">
+    <div class="ph"><span class="pt">Revenue by Device</span><span class="tag">Content</span></div>
+    <canvas id="devChart"></canvas>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Revenue by Country</span><span class="tag">Geo</span></div>
+    <canvas id="cntChart"></canvas>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">CPM Efficiency</span><span class="tag">Advertiser</span></div>
+    <canvas id="cpmChart"></canvas>
+  </div>
+</div>
+
+<!-- ROW 3: Table -->
+<div class="g1">
+  <div class="panel">
+    <div class="ph"><span class="pt">Top Content Performance</span><span class="tag">Gold · Content · Silver enriched</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Content</th><th>Revenue</th><th>Impressions</th>
+          <th>Avg CPM</th><th>Top Device</th><th>Country</th>
+          <th>Format</th><th>Premium %</th><th>Verified %</th>
+        </tr>
+      </thead>
+      <tbody id="tbl"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>AdStream · Built by Samwel Ngugi · Delta Lake Medallion Architecture</span>
+  <div class="stack-tags">
+    <span class="stag">Apache Kafka</span>
+    <span class="stag">PySpark 3.5</span>
+    <span class="stag">Delta Lake</span>
+    <span class="stag">Airflow</span>
+    <span class="stag">Python</span>
+    <span class="stag">Docker</span>
+  </div>
+</footer>
+
+</div>
+
+<script>
+// ── STATIC DATA (baked in — no API needed) ──────────────────────────────────
+const DATA = {
+  revenue: [
+    { advertiser_id:"adv_017", total_spend:44.28, impression_count:29, avg_cpm:1527.03 },
+    { advertiser_id:"adv_016", total_spend:26.95, impression_count:19, avg_cpm:1418.32 },
+    { advertiser_id:"adv_002", total_spend:26.82, impression_count:23, avg_cpm:1166.16 },
+    { advertiser_id:"adv_014", total_spend:26.06, impression_count:24, avg_cpm:1085.81 },
+    { advertiser_id:"adv_020", total_spend:25.28, impression_count:19, avg_cpm:1330.73 },
+    { advertiser_id:"adv_019", total_spend:24.65, impression_count:21, avg_cpm:1173.98 },
+    { advertiser_id:"adv_013", total_spend:23.81, impression_count:18, avg_cpm:1322.53 },
+    { advertiser_id:"adv_018", total_spend:23.58, impression_count:21, avg_cpm:1122.96 },
+    { advertiser_id:"adv_004", total_spend:23.54, impression_count:19, avg_cpm:1239.09 },
+    { advertiser_id:"adv_005", total_spend:22.97, impression_count:18, avg_cpm:1275.91 },
+  ],
+  content: [
+    { content_id:"cnt_055", total_revenue:18.91, total_impressions:14, avg_cpm:1350.45, top_device:"desktop", top_country:"CA", top_ad_format:"native",  premium_user_pct:14.3, verified_user_pct:92.9 },
+    { content_id:"cnt_053", total_revenue:14.92, total_impressions:14, avg_cpm:1065.96, top_device:"tablet",  top_country:"BR", top_ad_format:"native",  premium_user_pct:14.3, verified_user_pct:78.6 },
+    { content_id:"cnt_006", total_revenue:14.83, total_impressions:12, avg_cpm:1236.15, top_device:"desktop", top_country:"GB", top_ad_format:"banner",  premium_user_pct:8.3,  verified_user_pct:58.3 },
+    { content_id:"cnt_083", total_revenue:14.37, total_impressions:13, avg_cpm:1105.73, top_device:"tablet",  top_country:"KE", top_ad_format:"banner",  premium_user_pct:15.4, verified_user_pct:92.3 },
+    { content_id:"cnt_068", total_revenue:13.11, total_impressions:9,  avg_cpm:1456.32, top_device:"ctv",     top_country:"GB", top_ad_format:"banner",  premium_user_pct:0.0,  verified_user_pct:88.9 },
+    { content_id:"cnt_059", total_revenue:13.01, total_impressions:8,  avg_cpm:1625.76, top_device:"tablet",  top_country:"CA", top_ad_format:"banner",  premium_user_pct:25.0, verified_user_pct:87.5 },
+    { content_id:"cnt_025", total_revenue:12.79, total_impressions:11, avg_cpm:1162.37, top_device:"desktop", top_country:"CA", top_ad_format:"native",  premium_user_pct:27.3, verified_user_pct:100.0 },
+    { content_id:"cnt_070", total_revenue:12.49, total_impressions:8,  avg_cpm:1561.36, top_device:"mobile",  top_country:"GB", top_ad_format:"native",  premium_user_pct:0.0,  verified_user_pct:87.5 },
+    { content_id:"cnt_021", total_revenue:12.48, total_impressions:9,  avg_cpm:1387.19, top_device:"tablet",  top_country:"FR", top_ad_format:"video",   premium_user_pct:22.2, verified_user_pct:100.0 },
+    { content_id:"cnt_004", total_revenue:11.91, total_impressions:7,  avg_cpm:1702.08, top_device:"desktop", top_country:"DE", top_ad_format:"banner",  premium_user_pct:0.0,  verified_user_pct:85.7 },
+    { content_id:"cnt_051", total_revenue:11.86, total_impressions:8,  avg_cpm:1482.75, top_device:"desktop", top_country:"KE", top_ad_format:"native",  premium_user_pct:12.5, verified_user_pct:75.0 },
+    { content_id:"cnt_078", total_revenue:11.26, total_impressions:7,  avg_cpm:1608.61, top_device:"tablet",  top_country:"ZA", top_ad_format:"native",  premium_user_pct:0.0,  verified_user_pct:100.0 },
+    { content_id:"cnt_090", total_revenue:11.17, total_impressions:8,  avg_cpm:1396.30, top_device:"tablet",  top_country:"US", top_ad_format:"video",   premium_user_pct:0.0,  verified_user_pct:100.0 },
+    { content_id:"cnt_072", total_revenue:10.98, total_impressions:7,  avg_cpm:1568.20, top_device:"desktop", top_country:"IN", top_ad_format:"audio",   premium_user_pct:28.6, verified_user_pct:57.1 },
+    { content_id:"cnt_022", total_revenue:10.82, total_impressions:8,  avg_cpm:1352.52, top_device:"ctv",     top_country:"KE", top_ad_format:"native",  premium_user_pct:12.5, verified_user_pct:87.5 },
+  ],
+  device: [
+    { top_device:"tablet",  total_revenue:341.28 },
+    { top_device:"desktop", total_revenue:277.41 },
+    { top_device:"mobile",  total_revenue:174.34 },
+    { top_device:"ctv",     total_revenue:152.79 },
+  ],
+  country: [
+    { top_country:"CA", total_revenue:131.21 },
+    { top_country:"GB", total_revenue:126.22 },
+    { top_country:"KE", total_revenue:115.45 },
+    { top_country:"BR", total_revenue:109.58 },
+    { top_country:"DE", total_revenue:99.85  },
+    { top_country:"US", total_revenue:91.96  },
+    { top_country:"FR", total_revenue:86.31  },
+    { top_country:"IN", total_revenue:81.66  },
+    { top_country:"ZA", total_revenue:63.84  },
+    { top_country:"NG", total_revenue:39.75  },
+  ],
+};
+
+// ── CHART CONFIG ─────────────────────────────────────────────────────────────
+Chart.defaults.color = '#5a5a78';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+const grid = 'rgba(255,255,255,0.04)';
+
+// Revenue bar
+new Chart(document.getElementById('revChart'), {
+  type: 'bar',
+  data: {
+    labels: DATA.revenue.map(d => d.advertiser_id),
+    datasets: [{
+      data: DATA.revenue.map(d => d.total_spend),
+      backgroundColor: DATA.revenue.map((_, i) => i === 0 ? 'rgba(0,229,160,0.8)' : 'rgba(0,229,160,0.2)'),
+      borderColor: DATA.revenue.map((_, i) => i === 0 ? '#00e5a0' : 'rgba(0,229,160,0.4)'),
+      borderWidth: 1, borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: grid } },
+      y: { grid: { color: grid }, ticks: { callback: v => '$' + v.toFixed(0) } }
+    }
+  }
+});
+
+// Device doughnut
+new Chart(document.getElementById('devChart'), {
+  type: 'doughnut',
+  data: {
+    labels: DATA.device.map(d => d.top_device),
+    datasets: [{
+      data: DATA.device.map(d => d.total_revenue),
+      backgroundColor: ['rgba(255,209,102,0.8)','rgba(61,158,255,0.8)','rgba(0,229,160,0.8)','rgba(182,109,255,0.8)'],
+      borderColor: '#080810', borderWidth: 3,
+    }]
+  },
+  options: {
+    responsive: true, cutout: '62%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true, pointStyleWidth: 8, color: '#5a5a78' } }
+    }
+  }
+});
+
+// Country bar (horizontal)
+new Chart(document.getElementById('cntChart'), {
+  type: 'bar',
+  data: {
+    labels: DATA.country.map(d => d.top_country),
+    datasets: [{
+      data: DATA.country.map(d => d.total_revenue),
+      backgroundColor: 'rgba(61,158,255,0.25)',
+      borderColor: '#3d9eff', borderWidth: 1, borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: grid }, ticks: { callback: v => '$' + v } },
+      y: { grid: { color: grid } }
+    }
+  }
+});
+
+// CPM bar
+new Chart(document.getElementById('cpmChart'), {
+  type: 'bar',
+  data: {
+    labels: DATA.revenue.map(d => d.advertiser_id),
+    datasets: [{
+      data: DATA.revenue.map(d => d.avg_cpm),
+      backgroundColor: 'rgba(182,109,255,0.25)',
+      borderColor: '#b66dff', borderWidth: 1, borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: grid }, ticks: { font: { size: 9 } } },
+      y: { grid: { color: grid }, ticks: { callback: v => '$' + v.toFixed(0) } }
+    }
+  }
+});
+
+// ── CONTENT TABLE ────────────────────────────────────────────────────────────
+const devBadge = d => {
+  const m = { mobile:'b-mobile', desktop:'b-desktop', ctv:'b-ctv', tablet:'b-tablet' };
+  return `<span class="badge ${m[d]||'b-desktop'}">${d}</span>`;
+};
+
+document.getElementById('tbl').innerHTML = DATA.content.map((r, i) => `
+  <tr>
+    <td><span class="rank-num">${i+1}</span></td>
+    <td>${r.content_id}</td>
+    <td>$${r.total_revenue.toFixed(2)}</td>
+    <td>${r.total_impressions}</td>
+    <td>$${r.avg_cpm.toFixed(0)}</td>
+    <td>${devBadge(r.top_device)}</td>
+    <td>${r.top_country}</td>
+    <td>${r.top_ad_format}</td>
+    <td>${r.premium_user_pct}%</td>
+    <td>${r.verified_user_pct}%</td>
+  </tr>
+`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+# iPinYou data for AdStream
+
+AdStream's primary demonstration source is the public iPinYou real-time bidding dataset. The dataset contains real advertising campaign logs including impression opportunities, advertiser and creative identifiers, bids, paying prices, clicks and related auction context.
+
+## Why the repository does not download or commit the dataset
+
+The raw dataset is large and its distribution terms require users to obtain it from the dataset publisher/research mirrors. AdStream therefore keeps dataset acquisition manual and ignores `data/external/` in Git.
+
+References:
+
+- Dataset description: https://contest.ipinyou.com/ipinyou-dataset.pdf
+- Dataset formatter: https://github.com/wnzhang/make-ipinyou-data
+- The formatter README links to the UCL-hosted `ipinyou.contest.dataset.zip`.
+
+## Expected input
+
+This first integration consumes the formatted `train.log.txt` or `test.log.txt` created by `make-ipinyou-data`. For example:
+
+```text
+data/external/ipinyou/1458/train.log.txt
+```
+
+The formatted file has the `click`, `weekday`, and `hour` columns followed by the published iPinYou schema. AdStream keeps `bidprice` and `payprice` in the source-native RMB/CPM units rather than pretending they are USD revenue.
+
+## Replay into Kafka
+
+Start the existing local Kafka stack:
+
+```bash
+make up
+```
+
+Replay a small real slice first:
+
+```bash
+python -m src.producers.ipinyou_replay_producer \
+  data/external/ipinyou/1458/train.log.txt \
+  --limit 1000 \
+  --events-per-second 100
+```
+
+The events are written to the existing `ad.impressions.raw` topic and keyed by advertiser ID.
+
+## Bronze smoke test
+
+In another terminal, run the existing Bronze consumer:
+
+```bash
+python -m src.processing.bronze_ingestion
+```
+
+The canonical event preserves the source bid ID, bid price, paying price, click outcome, ad exchange and slot ID. `is_fraud` is explicitly `false` for imported iPinYou events; the ingestion layer does not fabricate a fraud label.
+
+## Native original-log ingestion
+
+AdStream can also read the original 24-column iPinYou impression logs directly,
+including `.bz2` files such as `training3rd/imp.20131023.txt.bz2`. This is the
+preferred local-development path because it avoids expanding the complete
+benchmark or depending on an external formatter.
+
+The raw reader streams one line at a time, can filter by advertiser before
+applying a limit, and preserves the auction fields needed by downstream
+analytics:
+
+- bid ID and timestamp
+- iPinYou user ID and user-agent
+- ad exchange and slot ID
+- creative ID
+- bidding price
+- paying/clearing price
+- advertiser ID
+
+Impression files do not contain click outcomes, so `clicked` remains `None`
+until click logs are correlated in a later processing slice. No fraud label is
+inferred or fabricated at ingestion.
+
+Example bounded replay for advertiser 2997:
+
+```bash
+python -m src.producers.ipinyou_replay_producer \
+  data/external/ipinyou/raw/imp.20131023.txt.bz2 \
+  --advertiser-id 2997 \
+  --limit 1000 \
+  --events-per-second 100
+```
+
+## Bronze storage semantics
+
+AdStream preserves the source dataset as received in Bronze.
+
+`source_bid_id` is a source lineage identifier and is not guaranteed to be
+unique at impression-event granularity. In the verified 2013-10-23 advertiser
+2997 sample, bid ID `4fa883601704fcea594fd2c17a1560f9` occurs twice in the
+original iPinYou file with different timestamps. Both records are therefore
+preserved rather than deduplicated.
+
+Bronze storage supports two explicit backends:
+
+- `delta` — the default local-development backend at
+  `data/bronze/impressions`
+- `iceberg` — the cloud backend at
+  `supabase.bronze.impressions` in Supabase Analytics
+
+Cloud persistence is opt-in with:
+
+    ADSTREAM_STORAGE_BACKEND=iceberg
+
+Kafka offsets are committed only after successful Bronze persistence.
+Delta transactional writes do not by themselves provide application-level
+deduplication for replayed events.

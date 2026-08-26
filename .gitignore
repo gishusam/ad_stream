@@ -1,0 +1,16 @@
+
+# Local/runtime data
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+data/external/
+airflow/logs/
+airflow/*.db
+airflow/*.pid
+
+# Local Spark / Delta runtime outputs
+data/**/*.parquet
+data/**/*.crc
+data/**/_delta_log/
+data/*.db

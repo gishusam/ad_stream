@@ -32,6 +32,7 @@ class BaseConsumer:
         max_retries: int = 3,
         retry_backoff_seconds: float = 2.0,
         batch_size: int = 100,
+        max_poll_interval_ms: int = 900000,
         _skip_connect: bool = False,
     ):
         self.topics = topics
@@ -40,6 +41,7 @@ class BaseConsumer:
         self.max_retries = max_retries
         self.retry_backoff_seconds = retry_backoff_seconds
         self.batch_size = batch_size
+        self.max_poll_interval_ms = max_poll_interval_ms
         self.consumer = None
         self._running = False
        
@@ -61,6 +63,7 @@ class BaseConsumer:
                     enable_auto_commit=False,        # MANUAL commit only
                     value_deserializer=lambda v: json.loads(v.decode("utf-8")),
                     max_poll_records=self.batch_size,
+                    max_poll_interval_ms=self.max_poll_interval_ms,
                     session_timeout_ms=30000,
                     heartbeat_interval_ms=10000,
                 )
@@ -120,17 +123,22 @@ class BaseConsumer:
         Commit current offsets to Kafka.
 
         ONLY call this after you have successfully written
-        the batch to Delta Lake. Never before.
+        the batch to Bronze storage. Never before.
         """
         if self.consumer:
             self.consumer.commit()
             logger.debug("offsets_committed")
 
     def close(self):
-        """Clean shutdown — commit final offsets and close connection."""
+        """
+        Close the Kafka consumer without committing offsets.
+
+        Offsets are committed explicitly only after a successful downstream
+        write. Committing during shutdown could acknowledge records whose
+        Bronze persistence failed, causing data loss.
+        """
         self._running = False
         if self.consumer:
-            self.consumer.commit()
             self.consumer.close()
             logger.info("consumer_closed", group_id=self.group_id)
 

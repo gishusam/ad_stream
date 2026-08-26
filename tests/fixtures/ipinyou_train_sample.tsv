@@ -1,0 +1,3 @@
+click	weekday	hour	bidid	timestamp	logtype	ipinyouid	useragent	IP	region	city	adexchange	domain	url	urlid	slotid	slotwidth	slotheight	slotvisibility	slotformat	slotprice	creative	bidprice	payprice	keypage	advertiser	usertag
+0	4	0	72879b068fec2d3c2afd51	20130606000105500	1	Vhk7ZAnyPIc9tbE	windows_chrome	121.225.158.*	80	84	1	trqRTuqbjoFf1mKYUV	de0cca5e4ff921ca803b	null	mm_34955955_11267874_10048459	728	90	0	1	0	48f2e9ba1570a5e1dd653caa	300	55	befa5efe83be5e7c5085b	1458	10006,10024
+1	4	0	bid-mobile-2	20130606000106500	1	user-mobile-2	android_chrome	10.0.0.*	80	84	2	domain2	url2	null	slot2	320	50	0	1	0	creative2	120	40	page2	3358	10031

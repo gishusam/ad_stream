@@ -20,8 +20,8 @@ class ImpressionConsumer(BaseConsumer):
     4. Flag fraud events with a log alert before passing downstream
 
     What it does NOT do:
-    - Write to Delta Lake (that's bronze_writer.py's job)
-    - Commit offsets (that's done after successful Delta write)
+    - Persist to Bronze (that's bronze_writer.py's job)
+    - Commit offsets (that's done after successful Bronze persistence)
     - Transform or clean data (that's Silver layer, Week 3)
 
     Single responsibility principle — each class does one thing.

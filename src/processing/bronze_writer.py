@@ -6,6 +6,8 @@ from pyspark.sql.types import (
 from pyspark.sql import functions as F
 from delta import configure_spark_with_delta_pip
 from src.models.events import ImpressionEvent
+from src.processing.spark import get_storage_spark_config
+from src.storage.bronze import build_bronze_backend
 from src.utils.logger import get_logger
 from datetime import datetime
 import os
@@ -15,31 +17,56 @@ logger = get_logger("bronze_writer")
 BRONZE_PATH = "data/bronze/impressions"
 
 
-def get_spark() -> SparkSession:
-    """
-    Create or retrieve the SparkSession with Delta Lake support.
+def resolve_bronze_backend_name(env=None) -> str:
+    """Return the explicitly configured Bronze storage backend."""
+    env = os.environ if env is None else env
+    backend = env.get("ADSTREAM_STORAGE_BACKEND", "delta").strip().lower()
 
-    Why a function instead of a global?
-    SparkSession is expensive to create. We create it once and reuse it.
-    The function pattern lets us mock it cleanly in tests.
+    if backend not in {"delta", "iceberg"}:
+        raise ValueError(
+            "Invalid ADSTREAM_STORAGE_BACKEND "
+            f"{backend!r}; expected one of: delta, iceberg"
+        )
 
-    The Delta Lake config tells Spark:
-    - Use Delta as the default table format
-    - Enable Delta-specific SQL extensions
-    """
+    return backend
+
+
+def get_spark(
+    backend_name: str | None = None,
+) -> SparkSession:
+    """Create a resource-constrained SparkSession for the selected backend."""
+    backend_name = (
+        backend_name
+        or resolve_bronze_backend_name()
+    )
+
+    storage_config = get_storage_spark_config(
+        backend_name
+    )
+
     builder = (
         SparkSession.builder
         .appName("AdStream-BronzeIngestion")
-        .master("local[2]")          # use all CPU cores on local machine
-        .config("spark.sql.extensions",
-                "io.delta.sql.DeltaSparkSessionExtension")
-        .config("spark.sql.catalog.spark_catalog",
-                "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .master("local[2]")  # two local Spark worker threads
         .config("spark.sql.shuffle.partitions", "2")
-        .config("spark.driver.memory", "1g")   # small for local dev
+        .config("spark.driver.memory", "1g")
         .config("spark.ui.showConsoleProgress", "false")
     )
-    return configure_spark_with_delta_pip(builder).getOrCreate()
+
+    for key, value in storage_config.items():
+        builder = builder.config(key, value)
+
+    if backend_name == "delta":
+        return configure_spark_with_delta_pip(
+            builder
+        ).getOrCreate()
+
+    # Reproduce the verified Supabase Iceberg environment.
+    region = os.environ["SUPABASE_S3_REGION"]
+    os.environ["AWS_REGION"] = region
+    os.environ["AWS_DEFAULT_REGION"] = region
+
+    return builder.getOrCreate()
 
 
 # Explicit schema — never infer schema from data in production
@@ -69,89 +96,87 @@ IMPRESSION_SCHEMA = StructType([
 
 
 class BronzeWriter:
-    """
-    Writes validated impression events to Delta Lake Bronze layer.
+    """Prepare validated impression events and persist them to Bronze."""
 
-    Design decisions:
-    1. Explicit schema — no schema inference ever
-    2. Partition by date — enables partition pruning on time queries
-    3. Append mode — Bronze is immutable, we never update or delete
-    4. Idempotent writes — if the same batch is written twice (replay),
-       Delta's transaction log prevents duplicate files corrupting the table
-    """
+    def __init__(
+        self,
+        spark: SparkSession = None,
+        backend_name: str | None = None,
+    ):
+        self.backend_name = (
+            backend_name
+            or resolve_bronze_backend_name()
+        )
 
-    def __init__(self, spark: SparkSession = None):
-        self.spark = spark or get_spark()
-        os.makedirs(BRONZE_PATH, exist_ok=True)
-        logger.info("bronze_writer_ready", path=BRONZE_PATH)
+        self.spark = (
+            spark
+            or get_spark(self.backend_name)
+        )
 
-    def write_batch(self, events: list[ImpressionEvent]) -> int:
-        """
-        Write a batch of ImpressionEvents to Delta Lake Bronze.
+        self.backend = build_bronze_backend(
+            self.spark,
+            self.backend_name,
+        )
 
-        Args:
-            events: list of validated ImpressionEvent objects
+        logger.info(
+            "bronze_writer_ready",
+            backend=self.backend_name,
+        )
 
-        Returns:
-            count of events written
+    def write_batch(
+        self,
+        events: list[ImpressionEvent],
+    ) -> int:
+        """Persist one validated impression batch to Bronze."""
 
-        Steps:
-        1. Convert Pydantic objects to plain dicts
-        2. Create a Spark DataFrame with our explicit schema
-        3. Add ingestion_date partition column
-        4. Write to Delta in append mode, partitioned by date
-        """
         if not events:
             logger.debug("empty_batch_skipped")
             return 0
 
-        # Convert Pydantic models to plain dicts
-        rows= []
+        rows = []
 
         for event in events:
             row = event.model_dump(mode="json")
-         # Convert timestamp string back to datetime object for Spark
+
             row["timestamp"] = datetime.fromisoformat(
-                row["timestamp"].replace("Z", "+00:00")
+                row["timestamp"].replace(
+                    "Z",
+                    "+00:00",
+                )
             )
+
             rows.append(row)
 
-        # Create DataFrame with explicit schema
-        df: DataFrame = self.spark.createDataFrame(rows, schema=IMPRESSION_SCHEMA)
+        df: DataFrame = self.spark.createDataFrame(
+            rows,
+            schema=IMPRESSION_SCHEMA,
+        )
 
-        # Add partition column — extract date from timestamp
-        # This is how Spark knows which folder to write each row into
         df = df.withColumn(
             "ingestion_date",
-            F.to_date(F.col("timestamp"))
+            F.to_date(F.col("timestamp")),
         )
 
-        # Write to Delta Lake
-        # partitionBy creates folder structure: ingestion_date=2026-04-27/
-        (
-            df.write
-            .format("delta")
-            .mode("append")
-            .partitionBy("ingestion_date")
-            .save(BRONZE_PATH)
-        )
+        self.backend.write(df)
 
         logger.info(
             "batch_written_to_bronze",
             count=len(events),
-            path=BRONZE_PATH,
-            fraud_count=sum(1 for e in events if e.is_fraud),
+            backend=self.backend_name,
+            fraud_count=sum(
+                1
+                for event in events
+                if event.is_fraud
+            ),
         )
 
         return len(events)
 
     def read_bronze(self) -> DataFrame:
-        """
-        Read the entire Bronze table back as a Spark DataFrame.
-        Used for verification and downstream Silver processing.
-        """
-        return self.spark.read.format("delta").load(BRONZE_PATH)
+        """Read Bronze through the configured persistence backend."""
+        return self.backend.read()
 
     def get_row_count(self) -> int:
-        """Return total rows in Bronze table."""
+        """Return total rows in the configured Bronze table."""
         return self.read_bronze().count()
+

@@ -10,7 +10,7 @@ logger = get_logger("bronze_ingestion")
 class BronzeIngestionPipeline:
     """
     Orchestrates the full Bronze ingestion flow:
-    Kafka → Consumer → Validate → Write to Delta → Commit offset
+    Kafka → Consumer → Validate → Persist to Bronze → Commit offset
 
     This is the file you run to start the pipeline.
     It ties consumer and writer together with the correct
@@ -50,7 +50,7 @@ class BronzeIngestionPipeline:
         Order of operations per batch:
         1. Poll Kafka for up to batch_size messages
         2. Validate and parse into ImpressionEvent objects
-        3. Write valid events to Delta Lake Bronze
+        3. Persist valid events to the configured Bronze backend
         4. ONLY THEN commit offsets to Kafka
         5. Repeat
 
@@ -72,7 +72,7 @@ class BronzeIngestionPipeline:
                 # Step 2 — validate
                 valid_events, invalid_events = self.consumer.parse_batch(raw_messages)
 
-                # Step 3 — write to Delta
+                # Step 3 — persist to Bronze
                 if valid_events:
                     written = self.writer.write_batch(valid_events)
                     self.total_written += written

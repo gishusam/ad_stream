@@ -123,7 +123,7 @@ class BaseConsumer:
         Commit current offsets to Kafka.
 
         ONLY call this after you have successfully written
-        the batch to Delta Lake. Never before.
+        the batch to Bronze storage. Never before.
         """
         if self.consumer:
             self.consumer.commit()
@@ -135,7 +135,7 @@ class BaseConsumer:
 
         Offsets are committed explicitly only after a successful downstream
         write. Committing during shutdown could acknowledge records whose
-        Delta write failed, causing data loss.
+        Bronze persistence failed, causing data loss.
         """
         self._running = False
         if self.consumer:

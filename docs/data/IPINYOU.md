@@ -83,3 +83,28 @@ python -m src.producers.ipinyou_replay_producer \
   --limit 1000 \
   --events-per-second 100
 ```
+
+## Bronze storage semantics
+
+AdStream preserves the source dataset as received in Bronze.
+
+`source_bid_id` is a source lineage identifier and is not guaranteed to be
+unique at impression-event granularity. In the verified 2013-10-23 advertiser
+2997 sample, bid ID `4fa883601704fcea594fd2c17a1560f9` occurs twice in the
+original iPinYou file with different timestamps. Both records are therefore
+preserved rather than deduplicated.
+
+Bronze storage supports two explicit backends:
+
+- `delta` — the default local-development backend at
+  `data/bronze/impressions`
+- `iceberg` — the cloud backend at
+  `supabase.bronze.impressions` in Supabase Analytics
+
+Cloud persistence is opt-in with:
+
+    ADSTREAM_STORAGE_BACKEND=iceberg
+
+Kafka offsets are committed only after successful Bronze persistence.
+Delta transactional writes do not by themselves provide application-level
+deduplication for replayed events.

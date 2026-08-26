@@ -50,3 +50,36 @@ python -m src.processing.bronze_ingestion
 ```
 
 The canonical event preserves the source bid ID, bid price, paying price, click outcome, ad exchange and slot ID. `is_fraud` is explicitly `false` for imported iPinYou events; the ingestion layer does not fabricate a fraud label.
+
+## Native original-log ingestion
+
+AdStream can also read the original 24-column iPinYou impression logs directly,
+including `.bz2` files such as `training3rd/imp.20131023.txt.bz2`. This is the
+preferred local-development path because it avoids expanding the complete
+benchmark or depending on an external formatter.
+
+The raw reader streams one line at a time, can filter by advertiser before
+applying a limit, and preserves the auction fields needed by downstream
+analytics:
+
+- bid ID and timestamp
+- iPinYou user ID and user-agent
+- ad exchange and slot ID
+- creative ID
+- bidding price
+- paying/clearing price
+- advertiser ID
+
+Impression files do not contain click outcomes, so `clicked` remains `None`
+until click logs are correlated in a later processing slice. No fraud label is
+inferred or fabricated at ingestion.
+
+Example bounded replay for advertiser 2997:
+
+```bash
+python -m src.producers.ipinyou_replay_producer \
+  data/external/ipinyou/raw/imp.20131023.txt.bz2 \
+  --advertiser-id 2997 \
+  --limit 1000 \
+  --events-per-second 100
+```

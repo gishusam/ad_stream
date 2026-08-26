@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import bz2
 import csv
 from datetime import datetime
 from pathlib import Path
@@ -100,6 +101,83 @@ class IPinYouLogReader:
                     source_bid_id=bid_id,
                     ad_exchange=row["adexchange"].strip() or None,
                     slot_id=row["slotid"].strip() or None,
+                    source_user_agent=user_agent or None,
+                )
+                emitted += 1
+
+
+def _null_to_none(value: str) -> str | None:
+    cleaned = value.strip()
+    return None if cleaned.lower() in {"", "null", "na"} else cleaned
+
+
+class IPinYouRawImpressionReader:
+    """Stream original iPinYou 24-column impression logs, including .bz2 files.
+
+    The reader filters before applying ``limit`` so callers can safely request a
+    bounded advertiser-specific sample from a much larger source file. Impression
+    logs do not contain click outcomes, so ``clicked`` remains unknown (None).
+    """
+
+    COLUMN_COUNT = 24
+
+    def __init__(self, path: str | Path, advertiser_id: str | None = None):
+        self.path = Path(path)
+        self.advertiser_id = advertiser_id
+
+    def __iter__(self) -> Iterator[ImpressionEvent]:
+        return self.iter_events()
+
+    def _open(self):
+        if self.path.suffix == ".bz2":
+            return bz2.open(self.path, "rt", encoding="utf-8", errors="replace")
+        return self.path.open("r", encoding="utf-8", errors="replace")
+
+    def iter_events(self, limit: int | None = None) -> Iterator[ImpressionEvent]:
+        if limit is not None and limit < 0:
+            raise ValueError("limit must be >= 0")
+
+        emitted = 0
+        with self._open() as handle:
+            for line_number, line in enumerate(handle, start=1):
+                if limit is not None and emitted >= limit:
+                    break
+
+                cols = line.rstrip("\n").split("\t")
+                if len(cols) != self.COLUMN_COUNT:
+                    raise ValueError(
+                        f"Expected 24 iPinYou impression columns at line {line_number}, "
+                        f"got {len(cols)}"
+                    )
+
+                advertiser = cols[22].strip()
+                if self.advertiser_id is not None and advertiser != self.advertiser_id:
+                    continue
+
+                bid_id = cols[0].strip()
+                user_id = cols[3].strip() or f"anonymous-{bid_id}"
+                user_agent = cols[4].strip()
+
+                yield ImpressionEvent(
+                    impression_id=bid_id,
+                    user_id=user_id,
+                    advertiser_id=advertiser,
+                    campaign_id=f"ipinyou-{advertiser}",
+                    content_id=cols[18].strip(),
+                    bid_price=float(cols[19]),
+                    paying_price=float(cols[20]),
+                    pricing_basis="CPM",
+                    currency="CNY",
+                    country_code="CN",
+                    device_type=_device_type(user_agent),
+                    ad_format="banner",
+                    timestamp=_parse_timestamp(cols[1]),
+                    clicked=None,
+                    is_fraud=False,
+                    source_dataset="ipinyou",
+                    source_bid_id=bid_id,
+                    ad_exchange=_null_to_none(cols[8]),
+                    slot_id=_null_to_none(cols[12]),
                     source_user_agent=user_agent or None,
                 )
                 emitted += 1

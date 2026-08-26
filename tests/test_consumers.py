@@ -46,11 +46,14 @@ class TestBaseConsumer:
         consumer.commit()
         consumer.consumer.commit.assert_called_once()
 
-    def test_close_commits_and_closes(self):
+    def test_close_does_not_commit_and_closes(self):
         consumer = make_base_consumer()
         consumer.consumer = MagicMock()
+
         consumer.close()
-        consumer.consumer.commit.assert_called()
+
+        consumer.consumer.commit.assert_not_called()
+        consumer.consumer.close.assert_called_once()
         consumer.consumer.close.assert_called()
 
     def test_poll_returns_empty_list_when_no_messages(self):

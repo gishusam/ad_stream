@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from typing import Protocol
 
 from src.models.events import ImpressionEvent
-from src.sources.ipinyou import IPinYouLogReader
+from src.sources.ipinyou import IPinYouLogReader, IPinYouRawImpressionReader
 
 
 IMPRESSION_TOPIC = "ad.impressions.raw"
@@ -15,6 +15,16 @@ IMPRESSION_TOPIC = "ad.impressions.raw"
 class EventSink(Protocol):
     def produce(self, topic: str, value: dict, key: str | None = None) -> None: ...
     def flush(self) -> None: ...
+
+
+def build_reader(log_path: str, advertiser_id: str | None = None):
+    """Select the original compressed impression reader or formatted-log reader."""
+    path = str(log_path)
+    if path.endswith(".bz2"):
+        return IPinYouRawImpressionReader(path, advertiser_id=advertiser_id)
+    if advertiser_id is not None:
+        raise ValueError("--advertiser-id is only supported for original .bz2 impression logs")
+    return IPinYouLogReader(path)
 
 
 class IPinYouReplayProducer:
@@ -70,6 +80,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("log_path", help="Path to iPinYou train.log.txt or test.log.txt")
     parser.add_argument("--bootstrap-servers", default="localhost:9092")
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--advertiser-id", help="Filter original .bz2 logs to one advertiser before applying --limit")
     parser.add_argument("--events-per-second", type=float, default=100.0)
     args = parser.parse_args(argv)
 
@@ -79,7 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     with BaseProducer(bootstrap_servers=args.bootstrap_servers) as sink:
         replay = IPinYouReplayProducer(sink=sink)
         sent = replay.replay(
-            IPinYouLogReader(args.log_path),
+            build_reader(args.log_path, advertiser_id=args.advertiser_id),
             limit=args.limit,
             events_per_second=args.events_per_second,
         )

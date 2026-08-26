@@ -30,12 +30,13 @@ def get_spark() -> SparkSession:
     builder = (
         SparkSession.builder
         .appName("AdStream-BronzeIngestion")
-        .master("local[*]")          # use all CPU cores on local machine
+        .master("local[2]")          # use all CPU cores on local machine
         .config("spark.sql.extensions",
                 "io.delta.sql.DeltaSparkSessionExtension")
         .config("spark.sql.catalog.spark_catalog",
                 "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-        .config("spark.sql.shuffle.partitions", "4")   # small for local dev
+        .config("spark.sql.shuffle.partitions", "2")
+        .config("spark.driver.memory", "1g")   # small for local dev
         .config("spark.ui.showConsoleProgress", "false")
     )
     return configure_spark_with_delta_pip(builder).getOrCreate()

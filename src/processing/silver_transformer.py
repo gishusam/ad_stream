@@ -9,8 +9,8 @@ SILVER_LEGITIMATE_PATH = "data/silver/impressions/legitimate"
 SILVER_FRAUD_PATH      = "data/silver/impressions/fraud"
 SILVER_QUARANTINE_PATH = "data/silver/impressions/quarantine"
 
-VALID_COUNTRIES  = ["US", "GB", "KE", "DE", "FR", "NG", "ZA", "IN", "BR", "CA"]
-VALID_CURRENCIES = ["USD", "EUR", "GBP", "KES", "NGN", "ZAR", "INR", "BRL", "CAD"]
+VALID_COUNTRIES  = ["US", "GB", "KE", "DE", "FR", "NG", "ZA", "IN", "BR", "CA", "CN"]
+VALID_CURRENCIES = ["USD", "EUR", "GBP", "KES", "NGN", "ZAR", "INR", "BRL", "CAD", "CNY"]
 VALID_DEVICES    = ["mobile", "desktop", "tablet", "ctv"]
 VALID_FORMATS    = ["banner", "video", "native", "audio"]
 

@@ -15,12 +15,23 @@ class ImpressionEvent(BaseModel):
     campaign_id: str
     content_id: str
     bid_price: float
-    currency: Literal["USD", "EUR", "GBP", "KES"]
+    currency: Literal["USD", "EUR", "GBP", "KES", "CNY"]
     country_code: str
     device_type: Literal["mobile", "desktop", "tablet", "ctv"]
     ad_format: Literal["banner", "video", "native", "audio"]
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_fraud: bool = False
+
+    # Optional source fields preserve real auction semantics without breaking
+    # the synthetic generator used for tests and load simulation.
+    paying_price: float | None = None
+    pricing_basis: Literal["CPM", "CPC", "CPA"] | None = None
+    clicked: bool | None = None
+    source_dataset: str | None = None
+    source_bid_id: str | None = None
+    ad_exchange: str | None = None
+    slot_id: str | None = None
+    source_user_agent: str | None = None
 
     @field_validator("bid_price")
     @classmethod
@@ -28,6 +39,13 @@ class ImpressionEvent(BaseModel):
         if v <= 0:
             raise ValueError(f"bid_price must be positive, got {v}")
         return round(v, 6)
+
+    @field_validator("paying_price")
+    @classmethod
+    def paying_price_must_be_non_negative(cls, v):
+        if v is not None and v < 0:
+            raise ValueError(f"paying_price must be non-negative, got {v}")
+        return round(v, 6) if v is not None else None
 
     @field_validator("country_code")
     @classmethod

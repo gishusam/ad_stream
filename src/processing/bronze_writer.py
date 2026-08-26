@@ -56,6 +56,14 @@ IMPRESSION_SCHEMA = StructType([
     StructField("ad_format",      StringType(),    nullable=False),
     StructField("timestamp",      TimestampType(), nullable=False),
     StructField("is_fraud",       BooleanType(),   nullable=False),
+    StructField("paying_price",   DoubleType(),    nullable=True),
+    StructField("pricing_basis",  StringType(),    nullable=True),
+    StructField("clicked",        BooleanType(),   nullable=True),
+    StructField("source_dataset", StringType(),    nullable=True),
+    StructField("source_bid_id",  StringType(),    nullable=True),
+    StructField("ad_exchange",    StringType(),    nullable=True),
+    StructField("slot_id",        StringType(),    nullable=True),
+    StructField("source_user_agent", StringType(), nullable=True),
 ])
 
 

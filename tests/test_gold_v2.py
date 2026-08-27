@@ -2,21 +2,14 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from pyspark.sql import SparkSession
+from src.processing.bronze_writer import get_spark
 
 from src.processing.gold_aggregator import GoldAggregator
 
 
 @pytest.fixture(scope="module")
 def spark():
-    session = (
-        SparkSession.builder
-        .master("local[1]")
-        .appName("AdStream-GoldV2-Tests")
-        .config("spark.ui.enabled", "false")
-        .config("spark.sql.shuffle.partitions", "1")
-        .getOrCreate()
-    )
+    session = get_spark("delta")
     yield session
     session.stop()
 
@@ -181,3 +174,201 @@ def test_traffic_quality_daily_reconciles_silver_and_quarantine(spark):
     assert row.quarantined_events == 1
     assert row.total_events == 4
     assert float(row.warning_rate) == pytest.approx(0.5)
+
+
+def test_delta_gold_backend_rebuild_overwrites_previous_snapshot(
+    spark,
+    tmp_path,
+):
+    from src.storage.gold import DeltaGoldBackend
+
+    backend = DeltaGoldBackend(
+        spark=spark,
+        advertiser_path=str(tmp_path / "advertiser_daily"),
+        creative_path=str(tmp_path / "creative_daily"),
+        quality_path=str(tmp_path / "traffic_quality_daily"),
+    )
+
+    advertiser_v1 = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                "2997",
+                10,
+            ),
+        ],
+        [
+            "event_date",
+            "advertiser_id",
+            "impressions",
+        ],
+    )
+
+    advertiser_v2 = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                "2997",
+                25,
+            ),
+        ],
+        [
+            "event_date",
+            "advertiser_id",
+            "impressions",
+        ],
+    )
+
+    creative = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                "2997",
+                "creative-a",
+                10,
+            ),
+        ],
+        [
+            "event_date",
+            "advertiser_id",
+            "creative_id",
+            "impressions",
+        ],
+    )
+
+    quality = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                10,
+            ),
+        ],
+        [
+            "event_date",
+            "total_events",
+        ],
+    )
+
+    backend.write(
+        advertiser_v1,
+        creative,
+        quality,
+    )
+
+    backend.write(
+        advertiser_v2,
+        creative,
+        quality,
+    )
+
+    rows = backend.read_advertiser_daily().collect()
+
+    assert len(rows) == 1
+    assert rows[0].impressions == 25
+
+
+def test_iceberg_gold_backend_rebuilds_three_tables(spark):
+    from src.storage.gold import IcebergGoldBackend
+
+    class RecordingSpark:
+        def __init__(self):
+            self.queries = []
+
+        def sql(self, query):
+            self.queries.append(
+                " ".join(query.split())
+            )
+
+    fake_spark = RecordingSpark()
+
+    backend = IcebergGoldBackend(fake_spark)
+
+    advertiser = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                "2997",
+                10,
+            ),
+        ],
+        [
+            "event_date",
+            "advertiser_id",
+            "impressions",
+        ],
+    )
+
+    creative = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                "2997",
+                "creative-a",
+                10,
+            ),
+        ],
+        [
+            "event_date",
+            "advertiser_id",
+            "creative_id",
+            "impressions",
+        ],
+    )
+
+    quality = spark.createDataFrame(
+        [
+            (
+                date(2013, 10, 23),
+                10,
+            ),
+        ],
+        [
+            "event_date",
+            "total_events",
+        ],
+    )
+
+    backend.write(
+        advertiser,
+        creative,
+        quality,
+    )
+
+    sql = "\n".join(fake_spark.queries)
+
+    assert (
+        "CREATE NAMESPACE IF NOT EXISTS supabase.gold"
+        in sql
+    )
+
+    for table in [
+        "advertiser_daily",
+        "creative_daily",
+        "traffic_quality_daily",
+    ]:
+        assert (
+            f"DROP TABLE IF EXISTS supabase.gold.{table}"
+            in sql
+        )
+        assert (
+            f"CREATE TABLE supabase.gold.{table}"
+            in sql
+        )
+        assert (
+            f"INSERT INTO supabase.gold.{table}"
+            in sql
+        )
+
+    namespace_index = next(
+        i
+        for i, query in enumerate(fake_spark.queries)
+        if "CREATE NAMESPACE IF NOT EXISTS supabase.gold" in query
+    )
+
+    first_drop_index = next(
+        i
+        for i, query in enumerate(fake_spark.queries)
+        if "DROP TABLE IF EXISTS" in query
+    )
+
+    assert namespace_index < first_drop_index

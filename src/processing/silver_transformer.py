@@ -35,6 +35,170 @@ class SilverTransformer:
     this cleanly. Each method is one responsibility.
     """
 
+    def classify_quality(
+        self,
+        df: DataFrame,
+    ) -> tuple[DataFrame, DataFrame]:
+        """Classify Silver events as VALID, WARNING, or INVALID."""
+        empty = F.expr("array()").cast("array<string>")
+
+        invalid_issues = F.concat(
+            F.when(
+                F.col("source_dataset").isNull(),
+                F.array(F.lit("missing_source_dataset")),
+            ).otherwise(empty),
+            F.when(
+                F.col("source_bid_id").isNull(),
+                F.array(F.lit("missing_source_bid_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("event_timestamp").isNull(),
+                F.array(F.lit("missing_event_timestamp")),
+            ).otherwise(empty),
+            F.when(
+                F.col("advertiser_id").isNull(),
+                F.array(F.lit("missing_advertiser_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("creative_id").isNull(),
+                F.array(F.lit("missing_creative_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("bid_price_cpm").isNull(),
+                F.array(F.lit("missing_bid_price")),
+            ).otherwise(empty),
+            F.when(
+                F.col("bid_price_cpm") < 0,
+                F.array(F.lit("negative_bid_price")),
+            ).otherwise(empty),
+            F.when(
+                F.col("clearing_price_cpm") < 0,
+                F.array(F.lit("negative_clearing_price")),
+            ).otherwise(empty),
+            F.when(
+                F.col("pricing_basis").isNull(),
+                F.array(F.lit("missing_pricing_basis")),
+            ).otherwise(empty),
+            F.when(
+                F.col("pricing_basis").isNotNull()
+                & (
+                    F.upper(F.trim(F.col("pricing_basis")))
+                    != F.lit("CPM")
+                ),
+                F.array(F.lit("unsupported_pricing_basis")),
+            ).otherwise(empty),
+        )
+
+        warning_issues = F.concat(
+            F.when(
+                F.col("clearing_price_cpm") > F.col("bid_price_cpm"),
+                F.array(F.lit("clearing_price_exceeds_bid")),
+            ).otherwise(empty),
+            F.when(
+                F.col("ad_exchange").isNull(),
+                F.array(F.lit("missing_ad_exchange")),
+            ).otherwise(empty),
+            F.when(
+                F.col("slot_id").isNull(),
+                F.array(F.lit("missing_slot_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("user_id").isNull(),
+                F.array(F.lit("missing_user_id")),
+            ).otherwise(empty),
+        )
+
+        classified = (
+            df
+            .withColumn("_invalid_issues", invalid_issues)
+            .withColumn("_warning_issues", warning_issues)
+            .withColumn(
+                "quality_issues",
+                F.concat(
+                    F.col("_invalid_issues"),
+                    F.col("_warning_issues"),
+                ),
+            )
+            .withColumn(
+                "data_quality_status",
+                F.when(
+                    F.size(F.col("_invalid_issues")) > 0,
+                    F.lit("INVALID"),
+                )
+                .when(
+                    F.size(F.col("_warning_issues")) > 0,
+                    F.lit("WARNING"),
+                )
+                .otherwise(F.lit("VALID")),
+            )
+            .drop("_invalid_issues", "_warning_issues")
+        )
+
+        usable = classified.filter(
+            F.col("data_quality_status") != "INVALID"
+        )
+
+        quarantine = classified.filter(
+            F.col("data_quality_status") == "INVALID"
+        )
+
+        return usable, quarantine
+
+    def derive_economics(self, df: DataFrame) -> DataFrame:
+        """Derive fixed-precision RTB auction economics."""
+        df = (
+            df
+            .withColumn(
+                "bid_price_cpm",
+                F.col("bid_price_cpm").cast("decimal(18,6)")
+            )
+            .withColumn(
+                "clearing_price_cpm",
+                F.col("clearing_price_cpm").cast("decimal(18,6)")
+            )
+        )
+
+        return (
+            df
+            .withColumn(
+                "impression_spend_cny",
+                (
+                    F.col("clearing_price_cpm") / F.lit(1000)
+                ).cast("decimal(18,9)")
+            )
+            .withColumn(
+                "auction_savings_cpm",
+                (
+                    F.col("bid_price_cpm")
+                    - F.col("clearing_price_cpm")
+                ).cast("decimal(18,6)")
+            )
+        )
+
+    def normalize_fields(self, df: DataFrame) -> DataFrame:
+        """Rename Bronze fields into canonical Silver RTB names."""
+        return (
+            df
+            .withColumnRenamed("timestamp", "event_timestamp")
+            .withColumnRenamed("content_id", "creative_id")
+            .withColumnRenamed("bid_price", "bid_price_cpm")
+            .withColumnRenamed("paying_price", "clearing_price_cpm")
+        )
+
+    def add_event_identity(self, df: DataFrame) -> DataFrame:
+        """Add the deterministic canonical Silver event identifier."""
+        identity = F.concat_ws(
+            "||",
+            F.col("source_dataset"),
+            F.col("source_bid_id"),
+            F.col("timestamp").cast("string"),
+        )
+
+        return df.withColumn(
+            "event_id",
+            F.sha2(identity, 256),
+        )
+
     def deduplicate(self, df: DataFrame) -> DataFrame:
         """
         Remove duplicate impression_ids.
@@ -48,7 +212,9 @@ class SilverTransformer:
         We deduplicate on impression_id only — the unique business key.
         """
         before = df.count()
-        df_deduped = df.dropDuplicates(["impression_id"])
+        df_deduped = df.dropDuplicates(
+            ["source_dataset", "source_bid_id", "timestamp"]
+        )
         after = df_deduped.count()
         duplicates_removed = before - after
 
@@ -203,38 +369,80 @@ class SilverTransformer:
     def transform(
         self,
         bronze_df: DataFrame,
-        user_profiles: DataFrame,
-    ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """
-        Run the full Silver transformation pipeline.
+    ) -> tuple[DataFrame, DataFrame]:
+        """Transform Bronze RTB events into canonical Silver and quarantine."""
+        transformed = self.deduplicate(bronze_df)
 
-        Returns:
-            legitimate_df:  clean, enriched, fraud-free impressions
-            fraud_df:       fraud impressions for analysis
-            quarantine_df:  records that failed quality checks
-        """
-        logger.info(
-            "silver_transformation_started",
-            input_rows=bronze_df.count(),
+        quarantine_identity = F.concat_ws(
+            "||",
+            F.coalesce(
+                F.col("impression_id"),
+                F.lit("<NULL>"),
+            ),
+            F.coalesce(
+                F.col("source_dataset"),
+                F.lit("<NULL>"),
+            ),
+            F.coalesce(
+                F.col("source_bid_id"),
+                F.lit("<NULL>"),
+            ),
+            F.coalesce(
+                F.col("timestamp").cast("string"),
+                F.lit("<NULL>"),
+            ),
         )
 
-        # Step 1 — deduplicate
-        df = self.deduplicate(bronze_df)
-
-        # Step 2 — quality check
-        df, quarantine_df = self.check_quality(df)
-
-        # Step 3 — enrich
-        df = self.enrich(df, user_profiles)
-
-        # Step 4 — split fraud
-        legitimate_df, fraud_df = self.split_fraud(df)
-
-        logger.info(
-            "silver_transformation_complete",
-            legitimate=legitimate_df.count(),
-            fraud=fraud_df.count(),
-            quarantined=quarantine_df.count(),
+        transformed = transformed.withColumn(
+            "quarantine_id",
+            F.sha2(quarantine_identity, 256),
         )
 
-        return legitimate_df, fraud_df, quarantine_df
+        transformed = self.add_event_identity(transformed)
+        transformed = self.normalize_fields(transformed)
+        transformed = self.derive_economics(transformed)
+
+        transformed = (
+            transformed
+            .withColumn(
+                "event_date",
+                F.to_date(F.col("event_timestamp")),
+            )
+            .withColumn(
+                "ingestion_date",
+                F.current_date(),
+            )
+        )
+
+        usable, quarantine = self.classify_quality(transformed)
+
+        silver_columns = [
+            "event_id",
+            "source_dataset",
+            "source_bid_id",
+            "event_timestamp",
+            "event_date",
+            "ingestion_date",
+            "advertiser_id",
+            "campaign_id",
+            "creative_id",
+            "user_id",
+            "ad_exchange",
+            "slot_id",
+            "device_type",
+            "ad_format",
+            "country_code",
+            "currency",
+            "pricing_basis",
+            "bid_price_cpm",
+            "clearing_price_cpm",
+            "impression_spend_cny",
+            "auction_savings_cpm",
+            "clicked",
+            "data_quality_status",
+            "quality_issues",
+        ]
+
+        silver = usable.select(*silver_columns)
+
+        return silver, quarantine

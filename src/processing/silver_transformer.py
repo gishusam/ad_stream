@@ -35,6 +35,37 @@ class SilverTransformer:
     this cleanly. Each method is one responsibility.
     """
 
+    def derive_economics(self, df: DataFrame) -> DataFrame:
+        """Derive fixed-precision RTB auction economics."""
+        df = (
+            df
+            .withColumn(
+                "bid_price_cpm",
+                F.col("bid_price_cpm").cast("decimal(18,6)")
+            )
+            .withColumn(
+                "clearing_price_cpm",
+                F.col("clearing_price_cpm").cast("decimal(18,6)")
+            )
+        )
+
+        return (
+            df
+            .withColumn(
+                "impression_spend_cny",
+                (
+                    F.col("clearing_price_cpm") / F.lit(1000)
+                ).cast("decimal(18,9)")
+            )
+            .withColumn(
+                "auction_savings_cpm",
+                (
+                    F.col("bid_price_cpm")
+                    - F.col("clearing_price_cpm")
+                ).cast("decimal(18,6)")
+            )
+        )
+
     def normalize_fields(self, df: DataFrame) -> DataFrame:
         """Rename Bronze fields into canonical Silver RTB names."""
         return (

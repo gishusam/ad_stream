@@ -110,3 +110,42 @@ def test_normalize_fields_uses_canonical_rtb_names(spark):
     assert "content_id" not in result.columns
     assert "bid_price" not in result.columns
     assert "paying_price" not in result.columns
+
+
+def test_derive_economics_uses_fixed_precision_cpm_semantics(spark):
+    from decimal import Decimal
+
+    bronze = spark.createDataFrame(
+        [
+            (
+                30.0,
+                18.0,
+                "CPM",
+                "CNY",
+            ),
+        ],
+        [
+            "bid_price_cpm",
+            "clearing_price_cpm",
+            "pricing_basis",
+            "currency",
+        ],
+    )
+
+    result = SilverTransformer().derive_economics(bronze)
+
+    row = result.first()
+    types = {
+        field.name: field.dataType.simpleString()
+        for field in result.schema.fields
+    }
+
+    assert types["bid_price_cpm"] == "decimal(18,6)"
+    assert types["clearing_price_cpm"] == "decimal(18,6)"
+    assert types["impression_spend_cny"] == "decimal(18,9)"
+    assert types["auction_savings_cpm"] == "decimal(18,6)"
+
+    assert row.bid_price_cpm == Decimal("30.000000")
+    assert row.clearing_price_cpm == Decimal("18.000000")
+    assert row.impression_spend_cny == Decimal("0.018000000")
+    assert row.auction_savings_cpm == Decimal("12.000000")

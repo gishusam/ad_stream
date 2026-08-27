@@ -35,6 +35,20 @@ class SilverTransformer:
     this cleanly. Each method is one responsibility.
     """
 
+    def add_event_identity(self, df: DataFrame) -> DataFrame:
+        """Add the deterministic canonical Silver event identifier."""
+        identity = F.concat_ws(
+            "||",
+            F.col("source_dataset"),
+            F.col("source_bid_id"),
+            F.col("timestamp").cast("string"),
+        )
+
+        return df.withColumn(
+            "event_id",
+            F.sha2(identity, 256),
+        )
+
     def deduplicate(self, df: DataFrame) -> DataFrame:
         """
         Remove duplicate impression_ids.
@@ -48,7 +62,9 @@ class SilverTransformer:
         We deduplicate on impression_id only — the unique business key.
         """
         before = df.count()
-        df_deduped = df.dropDuplicates(["impression_id"])
+        df_deduped = df.dropDuplicates(
+            ["source_dataset", "source_bid_id", "timestamp"]
+        )
         after = df_deduped.count()
         duplicates_removed = before - after
 

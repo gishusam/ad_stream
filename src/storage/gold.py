@@ -103,12 +103,8 @@ class IcebergGoldBackend:
         )
 
         self.spark.sql(
-            f"DROP TABLE IF EXISTS {table}"
-        )
-
-        self.spark.sql(
             f"""
-            CREATE TABLE {table} (
+            CREATE TABLE IF NOT EXISTS {table} (
                 {columns_sql}
             )
             USING iceberg
@@ -119,7 +115,7 @@ class IcebergGoldBackend:
 
         self.spark.sql(
             f"""
-            INSERT INTO {table}
+            INSERT OVERWRITE {table}
             SELECT *
             FROM {view}
             """

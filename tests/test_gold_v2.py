@@ -280,33 +280,15 @@ def test_iceberg_gold_backend_rebuilds_three_tables(spark):
             )
 
     fake_spark = RecordingSpark()
-
     backend = IcebergGoldBackend(fake_spark)
 
     advertiser = spark.createDataFrame(
-        [
-            (
-                date(2013, 10, 23),
-                "2997",
-                10,
-            ),
-        ],
-        [
-            "event_date",
-            "advertiser_id",
-            "impressions",
-        ],
+        [(date(2013, 10, 23), "2997", 10)],
+        ["event_date", "advertiser_id", "impressions"],
     )
 
     creative = spark.createDataFrame(
-        [
-            (
-                date(2013, 10, 23),
-                "2997",
-                "creative-a",
-                10,
-            ),
-        ],
+        [(date(2013, 10, 23), "2997", "creative-a", 10)],
         [
             "event_date",
             "advertiser_id",
@@ -316,16 +298,8 @@ def test_iceberg_gold_backend_rebuilds_three_tables(spark):
     )
 
     quality = spark.createDataFrame(
-        [
-            (
-                date(2013, 10, 23),
-                10,
-            ),
-        ],
-        [
-            "event_date",
-            "total_events",
-        ],
+        [(date(2013, 10, 23), 10)],
+        ["event_date", "total_events"],
     )
 
     backend.write(
@@ -341,37 +315,22 @@ def test_iceberg_gold_backend_rebuilds_three_tables(spark):
         in sql
     )
 
+    assert "DROP TABLE" not in sql
+
     for table in [
         "advertiser_daily",
         "creative_daily",
         "traffic_quality_daily",
     ]:
         assert (
-            f"DROP TABLE IF EXISTS supabase.gold.{table}"
+            f"CREATE TABLE IF NOT EXISTS supabase.gold.{table}"
             in sql
         )
+
         assert (
-            f"CREATE TABLE supabase.gold.{table}"
+            f"INSERT OVERWRITE supabase.gold.{table}"
             in sql
         )
-        assert (
-            f"INSERT INTO supabase.gold.{table}"
-            in sql
-        )
-
-    namespace_index = next(
-        i
-        for i, query in enumerate(fake_spark.queries)
-        if "CREATE NAMESPACE IF NOT EXISTS supabase.gold" in query
-    )
-
-    first_drop_index = next(
-        i
-        for i, query in enumerate(fake_spark.queries)
-        if "DROP TABLE IF EXISTS" in query
-    )
-
-    assert namespace_index < first_drop_index
 
 
 def test_gold_pipeline_builds_three_tables_from_canonical_silver(
@@ -574,3 +533,5 @@ def test_gold_pipeline_treats_missing_delta_quarantine_as_empty(
     assert result["silver"] == 1
     assert result["quarantine"] == 0
     assert result["traffic_quality_daily"] == 1
+
+

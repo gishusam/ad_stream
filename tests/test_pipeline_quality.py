@@ -67,3 +67,23 @@ def test_quality_gate_rejects_empty_gold_output():
 
     with pytest.raises(RuntimeError, match="Gold output"):
         validate(silver, gold)
+
+
+def test_quality_gate_rejects_silver_write_mismatch():
+    validate = load_validator()
+    silver, gold = healthy_results()
+
+    silver["written_silver"] = 989
+
+    with pytest.raises(RuntimeError, match="Silver write reconciliation"):
+        validate(silver, gold)
+
+
+def test_quality_gate_rejects_quarantine_write_mismatch():
+    validate = load_validator()
+    silver, gold = healthy_results()
+
+    silver["written_quarantine"] = 9
+
+    with pytest.raises(RuntimeError, match="Quarantine write reconciliation"):
+        validate(silver, gold)

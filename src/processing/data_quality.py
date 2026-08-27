@@ -17,6 +17,20 @@ def validate_pipeline_results(
             f"quarantine={silver_result['quarantine']}"
         )
 
+    if silver_result["written_silver"] != silver_result["silver"]:
+        raise RuntimeError(
+            "Silver write reconciliation failed: "
+            f"expected={silver_result['silver']}, "
+            f"written={silver_result['written_silver']}"
+        )
+
+    if silver_result["written_quarantine"] != silver_result["quarantine"]:
+        raise RuntimeError(
+            "Quarantine write reconciliation failed: "
+            f"expected={silver_result['quarantine']}, "
+            f"written={silver_result['written_quarantine']}"
+        )
+
     if (
         gold_result["silver"] != silver_result["silver"]
         or gold_result["quarantine"] != silver_result["quarantine"]

@@ -79,3 +79,34 @@ def test_event_id_is_deterministic_for_same_source_event(spark):
 
     assert len(set(event_ids)) == 1
     assert len(event_ids[0]) == 64
+
+
+def test_normalize_fields_uses_canonical_rtb_names(spark):
+    bronze = spark.createDataFrame(
+        [
+            (
+                datetime(2013, 10, 23, 17, 10, 5),
+                "creative-123",
+                30.0,
+                18.0,
+            ),
+        ],
+        [
+            "timestamp",
+            "content_id",
+            "bid_price",
+            "paying_price",
+        ],
+    )
+
+    result = SilverTransformer().normalize_fields(bronze)
+
+    assert "event_timestamp" in result.columns
+    assert "creative_id" in result.columns
+    assert "bid_price_cpm" in result.columns
+    assert "clearing_price_cpm" in result.columns
+
+    assert "timestamp" not in result.columns
+    assert "content_id" not in result.columns
+    assert "bid_price" not in result.columns
+    assert "paying_price" not in result.columns

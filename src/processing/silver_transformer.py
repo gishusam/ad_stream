@@ -35,6 +35,16 @@ class SilverTransformer:
     this cleanly. Each method is one responsibility.
     """
 
+    def normalize_fields(self, df: DataFrame) -> DataFrame:
+        """Rename Bronze fields into canonical Silver RTB names."""
+        return (
+            df
+            .withColumnRenamed("timestamp", "event_timestamp")
+            .withColumnRenamed("content_id", "creative_id")
+            .withColumnRenamed("bid_price", "bid_price_cpm")
+            .withColumnRenamed("paying_price", "clearing_price_cpm")
+        )
+
     def add_event_identity(self, df: DataFrame) -> DataFrame:
         """Add the deterministic canonical Silver event identifier."""
         identity = F.concat_ws(

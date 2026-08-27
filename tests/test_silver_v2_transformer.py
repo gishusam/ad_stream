@@ -390,3 +390,123 @@ def test_warning_events_remain_usable(
 
     assert row.data_quality_status == "WARNING"
     assert expected_issue in row.quality_issues
+
+
+def test_transform_builds_canonical_silver_and_quarantine(spark):
+    bronze = spark.createDataFrame(
+        [
+            (
+                "imp-1",
+                "ipinyou",
+                "bid-1",
+                datetime(2013, 10, 23, 17, 10, 5),
+                "2997",
+                "campaign-1",
+                "creative-1",
+                "user-1",
+                "exchange-1",
+                "slot-1",
+                "desktop",
+                "banner",
+                "CN",
+                "CNY",
+                "CPM",
+                30.0,
+                18.0,
+                None,
+                False,
+            ),
+            (
+                "imp-2",
+                "ipinyou",
+                "bid-2",
+                datetime(2013, 10, 23, 17, 10, 6),
+                None,                 # invalid: advertiser missing
+                "campaign-1",
+                "creative-2",
+                "user-2",
+                "exchange-1",
+                "slot-2",
+                "desktop",
+                "banner",
+                "CN",
+                "CNY",
+                "CPM",
+                25.0,
+                15.0,
+                None,
+                False,
+            ),
+        ],
+        """
+        impression_id string,
+        source_dataset string,
+        source_bid_id string,
+        timestamp timestamp,
+        advertiser_id string,
+        campaign_id string,
+        content_id string,
+        user_id string,
+        ad_exchange string,
+        slot_id string,
+        device_type string,
+        ad_format string,
+        country_code string,
+        currency string,
+        pricing_basis string,
+        bid_price double,
+        paying_price double,
+        clicked boolean,
+        is_fraud boolean
+        """,
+    )
+
+    silver, quarantine = SilverTransformer().transform(bronze)
+
+    assert silver.count() == 1
+    assert quarantine.count() == 1
+
+    expected_columns = {
+        "event_id",
+        "source_dataset",
+        "source_bid_id",
+        "event_timestamp",
+        "event_date",
+        "ingestion_date",
+        "advertiser_id",
+        "campaign_id",
+        "creative_id",
+        "user_id",
+        "ad_exchange",
+        "slot_id",
+        "device_type",
+        "ad_format",
+        "country_code",
+        "currency",
+        "pricing_basis",
+        "bid_price_cpm",
+        "clearing_price_cpm",
+        "impression_spend_cny",
+        "auction_savings_cpm",
+        "clicked",
+        "data_quality_status",
+        "quality_issues",
+    }
+
+    assert set(silver.columns) == expected_columns
+
+    # Legacy fake semantics must not leak into Silver v2.
+    assert "is_fraud" not in silver.columns
+    assert "account_tier" not in silver.columns
+    assert "registration_country" not in silver.columns
+
+    row = silver.first()
+
+    assert row.source_bid_id == "bid-1"
+    assert row.creative_id == "creative-1"
+    assert row.event_date.isoformat() == "2013-10-23"
+    assert len(row.event_id) == 64
+
+    invalid = quarantine.first()
+    assert invalid.data_quality_status == "INVALID"
+    assert "missing_advertiser_id" in invalid.quality_issues

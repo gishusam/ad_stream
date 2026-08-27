@@ -369,38 +369,54 @@ class SilverTransformer:
     def transform(
         self,
         bronze_df: DataFrame,
-        user_profiles: DataFrame,
-    ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """
-        Run the full Silver transformation pipeline.
+    ) -> tuple[DataFrame, DataFrame]:
+        """Transform Bronze RTB events into canonical Silver and quarantine."""
+        transformed = self.deduplicate(bronze_df)
+        transformed = self.add_event_identity(transformed)
+        transformed = self.normalize_fields(transformed)
+        transformed = self.derive_economics(transformed)
 
-        Returns:
-            legitimate_df:  clean, enriched, fraud-free impressions
-            fraud_df:       fraud impressions for analysis
-            quarantine_df:  records that failed quality checks
-        """
-        logger.info(
-            "silver_transformation_started",
-            input_rows=bronze_df.count(),
+        transformed = (
+            transformed
+            .withColumn(
+                "event_date",
+                F.to_date(F.col("event_timestamp")),
+            )
+            .withColumn(
+                "ingestion_date",
+                F.current_date(),
+            )
         )
 
-        # Step 1 — deduplicate
-        df = self.deduplicate(bronze_df)
+        usable, quarantine = self.classify_quality(transformed)
 
-        # Step 2 — quality check
-        df, quarantine_df = self.check_quality(df)
+        silver_columns = [
+            "event_id",
+            "source_dataset",
+            "source_bid_id",
+            "event_timestamp",
+            "event_date",
+            "ingestion_date",
+            "advertiser_id",
+            "campaign_id",
+            "creative_id",
+            "user_id",
+            "ad_exchange",
+            "slot_id",
+            "device_type",
+            "ad_format",
+            "country_code",
+            "currency",
+            "pricing_basis",
+            "bid_price_cpm",
+            "clearing_price_cpm",
+            "impression_spend_cny",
+            "auction_savings_cpm",
+            "clicked",
+            "data_quality_status",
+            "quality_issues",
+        ]
 
-        # Step 3 — enrich
-        df = self.enrich(df, user_profiles)
+        silver = usable.select(*silver_columns)
 
-        # Step 4 — split fraud
-        legitimate_df, fraud_df = self.split_fraud(df)
-
-        logger.info(
-            "silver_transformation_complete",
-            legitimate=legitimate_df.count(),
-            fraud=fraud_df.count(),
-            quarantined=quarantine_df.count(),
-        )
-
-        return legitimate_df, fraud_df, quarantine_df
+        return silver, quarantine

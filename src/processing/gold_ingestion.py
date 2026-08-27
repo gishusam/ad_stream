@@ -1,118 +1,114 @@
-from src.processing.bronze_writer import get_spark
-from src.processing.silver_transformer import (
-    SILVER_LEGITIMATE_PATH,
-    SILVER_FRAUD_PATH,
+"""Canonical Silver -> Gold ingestion for AdStream."""
+
+from src.processing.bronze_writer import (
+    get_spark,
+    resolve_bronze_backend_name,
 )
-from src.processing.gold_aggregator import (
-    GoldAggregator,
-    GOLD_REVENUE_PATH,
-    GOLD_CONTENT_PATH,
-    GOLD_FRAUD_PATH,
-)
+from src.processing.gold_aggregator import GoldAggregator
+from src.storage.gold import build_gold_backend
+from src.storage.silver import build_silver_backend
 from src.utils.logger import get_logger
-import os
+from pyspark.errors import AnalysisException
+
 
 logger = get_logger("gold_ingestion")
 
 
 class GoldIngestionPipeline:
-    """
-    Orchestrates Silver → Gold aggregation.
+    """Build the three Gold v2 daily aggregate tables."""
 
-    Reads from Silver Delta Lake tables, computes three
-    Gold aggregations, writes results to Gold Delta Lake.
-
-    This runs after every Silver update. In Week 4,
-    Airflow will chain Silver → Gold automatically.
-    Silver finishes → Gold starts. No manual steps.
-    """
-
-    def __init__(self):
-        self.spark       = get_spark()
-        self.aggregator  = GoldAggregator()
-
-        for path in [
-            GOLD_REVENUE_PATH,
-            GOLD_CONTENT_PATH,
-            GOLD_FRAUD_PATH,
-        ]:
-            os.makedirs(path, exist_ok=True)
-
-        logger.info("gold_pipeline_ready")
-
-    def read_silver(self):
-        """Read Silver legitimate and fraud tables."""
-        legitimate_df = (
-            self.spark.read
-            .format("delta")
-            .load(SILVER_LEGITIMATE_PATH)
-        )
-        fraud_df = (
-            self.spark.read
-            .format("delta")
-            .load(SILVER_FRAUD_PATH)
-        )
-        logger.info(
-            "silver_read",
-            legitimate=legitimate_df.count(),
-            fraud=fraud_df.count(),
-        )
-        return legitimate_df, fraud_df
-
-    def write_gold(self, df, path: str, table_name: str):
-        """
-        Write a Gold table to Delta Lake.
-
-        Gold uses overwrite mode — same as Silver.
-        Gold is always recomputed from Silver.
-        If Silver is reprocessed, Gold is reprocessed too.
-        The chain is: Bronze → Silver → Gold.
-        Fix Bronze, rerun Silver, rerun Gold. Clean.
-        """
-        (
-            df.write
-            .format("delta")
-            .mode("overwrite")
-            .save(path)
-        )
-        logger.info(
-            "gold_table_written",
-            table=table_name,
-            path=path,
-            rows=df.count(),
+    def __init__(
+        self,
+        spark=None,
+        backend_name: str | None = None,
+    ):
+        self.backend_name = (
+            backend_name
+            or resolve_bronze_backend_name()
         )
 
-    def run(self):
-        """Full Silver → Gold pipeline run."""
-        logger.info("gold_ingestion_started")
-
-        # Read Silver
-        legitimate_df, fraud_df = self.read_silver()
-
-        # Compute Gold tables
-        revenue_df = self.aggregator.compute_revenue_by_advertiser(
-            legitimate_df
-        )
-        content_df = self.aggregator.compute_content_performance(
-            legitimate_df
-        )
-        fraud_summary_df = self.aggregator.compute_fraud_summary(
-            fraud_df
+        self.spark = (
+            spark
+            or get_spark(self.backend_name)
         )
 
-        # Write Gold tables
-        self.write_gold(revenue_df,      GOLD_REVENUE_PATH, "revenue_by_advertiser")
-        self.write_gold(content_df,      GOLD_CONTENT_PATH, "content_performance")
-        self.write_gold(fraud_summary_df, GOLD_FRAUD_PATH,  "fraud_summary")
+        self.silver = build_silver_backend(
+            self.spark,
+            self.backend_name,
+        )
+
+        self.gold = build_gold_backend(
+            self.spark,
+            self.backend_name,
+        )
+
+        self.aggregator = GoldAggregator()
+
+    def run(self) -> dict[str, int]:
+        silver_df = self.silver.read_silver()
+
+        try:
+            quarantine_df = self.silver.read_quarantine()
+        except AnalysisException as exc:
+            if (
+                self.backend_name == "delta"
+                and "PATH_NOT_FOUND" in str(exc)
+            ):
+                quarantine_df = self.spark.createDataFrame(
+                    [],
+                    "quarantine_id string, event_date date",
+                )
+            else:
+                raise
+
+        silver_count = silver_df.count()
+        quarantine_count = quarantine_df.count()
+
+        advertiser_df = (
+            self.aggregator.compute_advertiser_daily(
+                silver_df
+            )
+        )
+
+        creative_df = (
+            self.aggregator.compute_creative_daily(
+                silver_df
+            )
+        )
+
+        quality_df = (
+            self.aggregator.compute_traffic_quality_daily(
+                silver_df,
+                quarantine_df,
+            )
+        )
+
+        advertiser_count = advertiser_df.count()
+        creative_count = creative_df.count()
+        quality_count = quality_df.count()
+
+        self.gold.write(
+            advertiser_df,
+            creative_df,
+            quality_df,
+        )
+
+        result = {
+            "silver": silver_count,
+            "quarantine": quarantine_count,
+            "advertiser_daily": advertiser_count,
+            "creative_daily": creative_count,
+            "traffic_quality_daily": quality_count,
+        }
 
         logger.info(
             "gold_ingestion_complete",
-            revenue_rows=revenue_df.count(),
-            content_rows=content_df.count(),
-            fraud_rows=fraud_summary_df.count(),
+            backend=self.backend_name,
+            **result,
         )
+
+        return result
 
 
 if __name__ == "__main__":
-    pipeline = GoldIngestionPipeline()
-    pipeline.run()
+    GoldIngestionPipeline().run()

@@ -372,3 +372,205 @@ def test_iceberg_gold_backend_rebuilds_three_tables(spark):
     )
 
     assert namespace_index < first_drop_index
+
+
+def test_gold_pipeline_builds_three_tables_from_canonical_silver(
+    spark,
+    monkeypatch,
+):
+    from src.processing import gold_ingestion
+
+    silver_df = spark.createDataFrame(
+        [
+            (
+                "event-1",
+                date(2013, 10, 23),
+                "2997",
+                "creative-a",
+                Decimal("30.000000"),
+                Decimal("18.000000"),
+                Decimal("0.018000000"),
+                Decimal("12.000000"),
+                True,
+                "WARNING",
+            ),
+            (
+                "event-2",
+                date(2013, 10, 23),
+                "2997",
+                "creative-a",
+                Decimal("40.000000"),
+                Decimal("20.000000"),
+                Decimal("0.020000000"),
+                Decimal("20.000000"),
+                None,
+                "VALID",
+            ),
+        ],
+        [
+            "event_id",
+            "event_date",
+            "advertiser_id",
+            "creative_id",
+            "bid_price_cpm",
+            "clearing_price_cpm",
+            "impression_spend_cny",
+            "auction_savings_cpm",
+            "clicked",
+            "data_quality_status",
+        ],
+    )
+
+    quarantine_df = spark.createDataFrame(
+        [],
+        "quarantine_id string, event_date date",
+    )
+
+    class FakeSilverBackend:
+        def read_silver(self):
+            return silver_df
+
+        def read_quarantine(self):
+            return quarantine_df
+
+    class FakeGoldBackend:
+        def __init__(self):
+            self.tables = None
+
+        def write(
+            self,
+            advertiser_df,
+            creative_df,
+            quality_df,
+        ):
+            self.tables = (
+                advertiser_df,
+                creative_df,
+                quality_df,
+            )
+
+    fake_gold = FakeGoldBackend()
+
+    monkeypatch.setattr(
+        gold_ingestion,
+        "build_silver_backend",
+        lambda spark, backend_name: FakeSilverBackend(),
+    )
+
+    monkeypatch.setattr(
+        gold_ingestion,
+        "build_gold_backend",
+        lambda spark, backend_name: fake_gold,
+    )
+
+    pipeline = gold_ingestion.GoldIngestionPipeline(
+        spark=spark,
+        backend_name="delta",
+    )
+
+    result = pipeline.run()
+
+    assert result == {
+        "silver": 2,
+        "quarantine": 0,
+        "advertiser_daily": 1,
+        "creative_daily": 1,
+        "traffic_quality_daily": 1,
+    }
+
+    advertiser, creative, quality = fake_gold.tables
+
+    assert advertiser.collect()[0].impressions == 2
+    assert creative.collect()[0].impressions == 2
+
+    quality_row = quality.collect()[0]
+    assert quality_row.total_events == 2
+    assert quality_row.valid_events == 1
+    assert quality_row.warning_events == 1
+    assert quality_row.quarantined_events == 0
+
+
+def test_gold_pipeline_treats_missing_delta_quarantine_as_empty(
+    spark,
+    monkeypatch,
+    tmp_path,
+):
+    from src.processing import gold_ingestion
+    from src.storage.silver import DeltaSilverBackend
+
+    silver_df = spark.createDataFrame(
+        [
+            (
+                "event-1",
+                date(2013, 10, 23),
+                "2997",
+                "creative-a",
+                Decimal("30.000000"),
+                Decimal("18.000000"),
+                Decimal("0.018000000"),
+                Decimal("12.000000"),
+                None,
+                "WARNING",
+            ),
+        ],
+        """
+        event_id string,
+        event_date date,
+        advertiser_id string,
+        creative_id string,
+        bid_price_cpm decimal(18,6),
+        clearing_price_cpm decimal(18,6),
+        impression_spend_cny decimal(18,9),
+        auction_savings_cpm decimal(18,6),
+        clicked boolean,
+        data_quality_status string
+        """,
+    )
+
+    silver_path = str(tmp_path / "silver")
+    quarantine_path = str(tmp_path / "missing_quarantine")
+
+    (
+        silver_df.write
+        .format("delta")
+        .mode("overwrite")
+        .save(silver_path)
+    )
+
+    silver_backend = DeltaSilverBackend(
+        spark,
+        silver_path=silver_path,
+        quarantine_path=quarantine_path,
+    )
+
+    class FakeGoldBackend:
+        def write(
+            self,
+            advertiser_df,
+            creative_df,
+            quality_df,
+        ):
+            pass
+
+    monkeypatch.setattr(
+        gold_ingestion,
+        "build_silver_backend",
+        lambda spark, backend_name: silver_backend,
+    )
+
+    monkeypatch.setattr(
+        gold_ingestion,
+        "build_gold_backend",
+        lambda spark, backend_name: FakeGoldBackend(),
+    )
+
+    pipeline = gold_ingestion.GoldIngestionPipeline(
+        spark=spark,
+        backend_name="delta",
+    )
+
+    result = pipeline.run()
+
+    assert result["silver"] == 1
+    assert result["quarantine"] == 0
+    assert result["traffic_quality_daily"] == 1

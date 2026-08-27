@@ -155,3 +155,74 @@ class IcebergGoldBackend:
             self.quality_table,
             "adstream_gold_quality",
         )
+
+
+def _read_delta(
+    spark: SparkSession,
+    path: str,
+) -> DataFrame:
+    return (
+        spark.read
+        .format("delta")
+        .load(path)
+    )
+
+
+DeltaGoldBackend.read_creative_daily = (
+    lambda self: _read_delta(
+        self.spark,
+        self.creative_path,
+    )
+)
+
+DeltaGoldBackend.read_traffic_quality_daily = (
+    lambda self: _read_delta(
+        self.spark,
+        self.quality_path,
+    )
+)
+
+
+def _read_iceberg(
+    spark: SparkSession,
+    table: str,
+) -> DataFrame:
+    return spark.table(table)
+
+
+IcebergGoldBackend.read_advertiser_daily = (
+    lambda self: _read_iceberg(
+        self.spark,
+        self.advertiser_table,
+    )
+)
+
+IcebergGoldBackend.read_creative_daily = (
+    lambda self: _read_iceberg(
+        self.spark,
+        self.creative_table,
+    )
+)
+
+IcebergGoldBackend.read_traffic_quality_daily = (
+    lambda self: _read_iceberg(
+        self.spark,
+        self.quality_table,
+    )
+)
+
+
+def build_gold_backend(
+    spark: SparkSession,
+    backend_name: str,
+):
+    if backend_name == "delta":
+        return DeltaGoldBackend(spark)
+
+    if backend_name == "iceberg":
+        return IcebergGoldBackend(spark)
+
+    raise ValueError(
+        f"Unknown Gold backend {backend_name!r}; "
+        "expected one of: delta, iceberg"
+    )

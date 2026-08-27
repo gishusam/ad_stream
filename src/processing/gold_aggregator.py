@@ -23,6 +23,43 @@ class GoldAggregator:
     Writing is handled by GoldIngestionPipeline.
     """
 
+    def compute_advertiser_daily(
+        self,
+        silver_df: DataFrame,
+    ) -> DataFrame:
+        """Daily advertiser-level RTB metrics from canonical Silver."""
+        return (
+            silver_df
+            .groupBy(
+                "event_date",
+                "advertiser_id",
+            )
+            .agg(
+                F.count("event_id").alias("impressions"),
+
+                F.sum("impression_spend_cny")
+                .alias("total_spend_cny"),
+
+                F.avg("bid_price_cpm")
+                .alias("average_bid_cpm"),
+
+                F.avg("clearing_price_cpm")
+                .alias("average_clearing_cpm"),
+
+                (
+                    F.sum("auction_savings_cpm")
+                    / F.lit(1000)
+                ).alias("total_auction_savings_cny"),
+
+                F.sum(
+                    F.when(
+                        F.col("data_quality_status") == "WARNING",
+                        1,
+                    ).otherwise(0)
+                ).alias("warning_events"),
+            )
+        )
+
     def compute_revenue_by_advertiser(
         self, legitimate_df: DataFrame
     ) -> DataFrame:

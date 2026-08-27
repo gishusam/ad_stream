@@ -23,6 +23,148 @@ class GoldAggregator:
     Writing is handled by GoldIngestionPipeline.
     """
 
+    def compute_advertiser_daily(
+        self,
+        silver_df: DataFrame,
+    ) -> DataFrame:
+        """Daily advertiser-level RTB metrics from canonical Silver."""
+        return (
+            silver_df
+            .groupBy(
+                "event_date",
+                "advertiser_id",
+            )
+            .agg(
+                F.count("event_id").alias("impressions"),
+
+                F.sum("impression_spend_cny")
+                .alias("total_spend_cny"),
+
+                F.avg("bid_price_cpm")
+                .alias("average_bid_cpm"),
+
+                F.avg("clearing_price_cpm")
+                .alias("average_clearing_cpm"),
+
+                (
+                    F.sum("auction_savings_cpm")
+                    / F.lit(1000)
+                ).alias("total_auction_savings_cny"),
+
+                F.sum(
+                    F.when(
+                        F.col("data_quality_status") == "WARNING",
+                        1,
+                    ).otherwise(0)
+                ).alias("warning_events"),
+            )
+        )
+
+    def compute_creative_daily(
+        self,
+        silver_df: DataFrame,
+    ) -> DataFrame:
+        """Daily creative-level metrics from canonical Silver."""
+        return (
+            silver_df
+            .groupBy(
+                "event_date",
+                "advertiser_id",
+                "creative_id",
+            )
+            .agg(
+                F.count("event_id").alias("impressions"),
+
+                F.sum("impression_spend_cny")
+                .alias("total_spend_cny"),
+
+                F.avg("clearing_price_cpm")
+                .alias("average_clearing_cpm"),
+
+                F.sum(
+                    F.when(
+                        F.col("clicked") == True,
+                        1,
+                    ).otherwise(0)
+                ).alias("clicks"),
+            )
+        )
+
+    def compute_traffic_quality_daily(
+        self,
+        silver_df: DataFrame,
+        quarantine_df: DataFrame,
+    ) -> DataFrame:
+        """Daily data-quality reconciliation across Silver and quarantine."""
+        silver_quality = (
+            silver_df
+            .groupBy("event_date")
+            .agg(
+                F.sum(
+                    F.when(
+                        F.col("data_quality_status") == "VALID",
+                        1,
+                    ).otherwise(0)
+                ).alias("valid_events"),
+
+                F.sum(
+                    F.when(
+                        F.col("data_quality_status") == "WARNING",
+                        1,
+                    ).otherwise(0)
+                ).alias("warning_events"),
+            )
+        )
+
+        quarantine_quality = (
+            quarantine_df
+            .groupBy("event_date")
+            .agg(
+                F.count("*").alias("quarantined_events")
+            )
+        )
+
+        result = (
+            silver_quality
+            .join(
+                quarantine_quality,
+                on="event_date",
+                how="full",
+            )
+            .fillna(
+                0,
+                subset=[
+                    "valid_events",
+                    "warning_events",
+                    "quarantined_events",
+                ],
+            )
+            .withColumn(
+                "total_events",
+                F.col("valid_events")
+                + F.col("warning_events")
+                + F.col("quarantined_events"),
+            )
+            .withColumn(
+                "warning_rate",
+                F.when(
+                    F.col("total_events") > 0,
+                    F.col("warning_events")
+                    / F.col("total_events"),
+                ).otherwise(F.lit(0.0)),
+            )
+            .select(
+                "event_date",
+                "total_events",
+                "valid_events",
+                "warning_events",
+                "warning_rate",
+                "quarantined_events",
+            )
+        )
+
+        return result
+
     def compute_revenue_by_advertiser(
         self, legitimate_df: DataFrame
     ) -> DataFrame:

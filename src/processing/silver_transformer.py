@@ -44,8 +44,48 @@ class SilverTransformer:
 
         invalid_issues = F.concat(
             F.when(
+                F.col("source_dataset").isNull(),
+                F.array(F.lit("missing_source_dataset")),
+            ).otherwise(empty),
+            F.when(
+                F.col("source_bid_id").isNull(),
+                F.array(F.lit("missing_source_bid_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("event_timestamp").isNull(),
+                F.array(F.lit("missing_event_timestamp")),
+            ).otherwise(empty),
+            F.when(
                 F.col("advertiser_id").isNull(),
                 F.array(F.lit("missing_advertiser_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("creative_id").isNull(),
+                F.array(F.lit("missing_creative_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("bid_price_cpm").isNull(),
+                F.array(F.lit("missing_bid_price")),
+            ).otherwise(empty),
+            F.when(
+                F.col("bid_price_cpm") < 0,
+                F.array(F.lit("negative_bid_price")),
+            ).otherwise(empty),
+            F.when(
+                F.col("clearing_price_cpm") < 0,
+                F.array(F.lit("negative_clearing_price")),
+            ).otherwise(empty),
+            F.when(
+                F.col("pricing_basis").isNull(),
+                F.array(F.lit("missing_pricing_basis")),
+            ).otherwise(empty),
+            F.when(
+                F.col("pricing_basis").isNotNull()
+                & (
+                    F.upper(F.trim(F.col("pricing_basis")))
+                    != F.lit("CPM")
+                ),
+                F.array(F.lit("unsupported_pricing_basis")),
             ).otherwise(empty),
         )
 

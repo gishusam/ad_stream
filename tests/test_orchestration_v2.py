@@ -38,3 +38,11 @@ def test_dag_runs_quality_gate_after_gold():
     assert "validate_pipeline_results" in source
     assert 'task_id="data_quality_check"' in source
     assert "gold_task >> quality_task" in source
+
+
+def test_dag_refreshes_serving_after_quality_gate():
+    source = DAG_PATH.read_text()
+
+    assert "ServingPipeline" in source
+    assert 'task_id="serving_refresh"' in source
+    assert "quality_task >> serving_task" in source

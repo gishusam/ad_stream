@@ -17,3 +17,6 @@ data/*.db
 
 # Local cloud credentials
 .env.supabase
+
+# Python packaging artifacts
+*.egg-info/

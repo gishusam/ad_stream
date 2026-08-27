@@ -14,3 +14,6 @@ data/**/*.parquet
 data/**/*.crc
 data/**/_delta_log/
 data/*.db
+
+# Local cloud credentials
+.env.supabase

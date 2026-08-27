@@ -26,10 +26,22 @@ def run_gold():
     return GoldIngestionPipeline().run()
 
 
+def run_quality(ti):
+    from src.processing.data_quality import validate_pipeline_results
+
+    silver_result = ti.xcom_pull(task_ids="silver_transformation")
+    gold_result = ti.xcom_pull(task_ids="gold_aggregation")
+
+    return validate_pipeline_results(
+        silver_result,
+        gold_result,
+    )
+
+
 with DAG(
     dag_id="adstream_medallion_pipeline",
     default_args=default_args,
-    description="Build AdStream Silver and Gold from persisted Bronze data",
+    description="Build and validate AdStream Silver and Gold from persisted Bronze data",
     schedule_interval="@hourly",
     start_date=datetime(2026, 8, 27),
     catchup=False,
@@ -45,4 +57,9 @@ with DAG(
         python_callable=run_gold,
     )
 
-    silver_task >> gold_task
+    quality_task = PythonOperator(
+        task_id="data_quality_check",
+        python_callable=run_quality,
+    )
+
+    silver_task >> gold_task >> quality_task

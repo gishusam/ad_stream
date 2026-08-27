@@ -30,3 +30,11 @@ def test_dag_orchestrates_current_batch_layers():
 
     assert "SilverIngestionPipeline" in source
     assert "GoldIngestionPipeline" in source
+
+
+def test_dag_runs_quality_gate_after_gold():
+    source = DAG_PATH.read_text()
+
+    assert "validate_pipeline_results" in source
+    assert 'task_id="data_quality_check"' in source
+    assert "gold_task >> quality_task" in source

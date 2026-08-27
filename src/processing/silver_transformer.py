@@ -372,6 +372,32 @@ class SilverTransformer:
     ) -> tuple[DataFrame, DataFrame]:
         """Transform Bronze RTB events into canonical Silver and quarantine."""
         transformed = self.deduplicate(bronze_df)
+
+        quarantine_identity = F.concat_ws(
+            "||",
+            F.coalesce(
+                F.col("impression_id"),
+                F.lit("<NULL>"),
+            ),
+            F.coalesce(
+                F.col("source_dataset"),
+                F.lit("<NULL>"),
+            ),
+            F.coalesce(
+                F.col("source_bid_id"),
+                F.lit("<NULL>"),
+            ),
+            F.coalesce(
+                F.col("timestamp").cast("string"),
+                F.lit("<NULL>"),
+            ),
+        )
+
+        transformed = transformed.withColumn(
+            "quarantine_id",
+            F.sha2(quarantine_identity, 256),
+        )
+
         transformed = self.add_event_identity(transformed)
         transformed = self.normalize_fields(transformed)
         transformed = self.derive_economics(transformed)

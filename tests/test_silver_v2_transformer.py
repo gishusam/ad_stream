@@ -510,3 +510,10 @@ def test_transform_builds_canonical_silver_and_quarantine(spark):
     invalid = quarantine.first()
     assert invalid.data_quality_status == "INVALID"
     assert "missing_advertiser_id" in invalid.quality_issues
+    assert len(invalid.quarantine_id) == 64
+
+    _, quarantine_again = SilverTransformer().transform(bronze)
+    assert (
+        quarantine_again.first().quarantine_id
+        == invalid.quarantine_id
+    )

@@ -326,3 +326,67 @@ def test_structurally_invalid_events_are_quarantined(
 
     assert row.data_quality_status == "INVALID"
     assert expected_issue in row.quality_issues
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected_issue"),
+    [
+        ({"ad_exchange": None}, "missing_ad_exchange"),
+        ({"slot_id": None}, "missing_slot_id"),
+        ({"user_id": None}, "missing_user_id"),
+        (
+            {"bid_price_cpm": 20.0, "clearing_price_cpm": 25.0},
+            "clearing_price_exceeds_bid",
+        ),
+    ],
+)
+def test_warning_events_remain_usable(
+    spark,
+    overrides,
+    expected_issue,
+):
+    values = {
+        "source_dataset": "ipinyou",
+        "source_bid_id": "bid-warning",
+        "event_timestamp": datetime(2013, 10, 23, 17, 10, 5),
+        "advertiser_id": "2997",
+        "creative_id": "creative-123",
+        "bid_price_cpm": 30.0,
+        "clearing_price_cpm": 18.0,
+        "pricing_basis": "CPM",
+        "ad_exchange": "exchange-1",
+        "slot_id": "slot-1",
+        "user_id": "user-1",
+        "device_type": "desktop",
+        "ad_format": "banner",
+    }
+    values.update(overrides)
+
+    bronze = spark.createDataFrame(
+        [tuple(values.values())],
+        """
+        source_dataset string,
+        source_bid_id string,
+        event_timestamp timestamp,
+        advertiser_id string,
+        creative_id string,
+        bid_price_cpm double,
+        clearing_price_cpm double,
+        pricing_basis string,
+        ad_exchange string,
+        slot_id string,
+        user_id string,
+        device_type string,
+        ad_format string
+        """,
+    )
+
+    usable, quarantine = SilverTransformer().classify_quality(bronze)
+
+    assert usable.count() == 1
+    assert quarantine.count() == 0
+
+    row = usable.first()
+
+    assert row.data_quality_status == "WARNING"
+    assert expected_issue in row.quality_issues

@@ -98,6 +98,14 @@ class SilverTransformer:
                 F.col("ad_exchange").isNull(),
                 F.array(F.lit("missing_ad_exchange")),
             ).otherwise(empty),
+            F.when(
+                F.col("slot_id").isNull(),
+                F.array(F.lit("missing_slot_id")),
+            ).otherwise(empty),
+            F.when(
+                F.col("user_id").isNull(),
+                F.array(F.lit("missing_user_id")),
+            ).otherwise(empty),
         )
 
         classified = (

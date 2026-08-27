@@ -1,127 +1,95 @@
-from src.processing.bronze_writer import get_spark, BRONZE_PATH
-from src.processing.silver_transformer import (
-    SilverTransformer,
-    SILVER_LEGITIMATE_PATH,
-    SILVER_FRAUD_PATH,
-    SILVER_QUARANTINE_PATH,
+"""Bronze → Silver ingestion for AdStream."""
+
+from src.processing.bronze_writer import (
+    BronzeWriter,
+    get_spark,
+    resolve_bronze_backend_name,
 )
-from src.processing.user_profiles import generate_user_profiles
+from src.processing.silver_transformer import SilverTransformer
+from src.storage.silver import build_silver_backend
 from src.utils.logger import get_logger
-import os
+
 
 logger = get_logger("silver_ingestion")
 
 
 class SilverIngestionPipeline:
-    """
-    Orchestrates Bronze → Silver transformation.
+    """Transform configured Bronze storage into canonical Silver."""
 
-    Reads from Bronze Delta Lake, applies all four Silver
-    transformations, writes three output tables.
-
-    This runs as a scheduled batch job — in Week 4 Airflow
-    will trigger this every 15 minutes automatically.
-    For now we run it manually.
-    """
-
-    def __init__(self):
-        self.spark       = get_spark()
-        self.transformer = SilverTransformer()
-        self.user_profiles = generate_user_profiles(self.spark)
-
-        # Create output directories
-        for path in [
-            SILVER_LEGITIMATE_PATH,
-            SILVER_FRAUD_PATH,
-            SILVER_QUARANTINE_PATH,
-        ]:
-            os.makedirs(path, exist_ok=True)
-
-        logger.info("silver_pipeline_ready")
-
-    def read_bronze(self):
-        """Read entire Bronze table."""
-        df = self.spark.read.format("delta").load(BRONZE_PATH)
-        logger.info("bronze_read", rows=df.count())
-        return df
-
-    def write_silver(
+    def __init__(
         self,
-        legitimate_df,
-        fraud_df,
-        quarantine_df,
+        spark=None,
+        backend_name: str | None = None,
     ):
-        """
-        Write all three Silver tables to Delta Lake.
-
-        Why overwrite mode for Silver?
-        Silver is recomputed from Bronze every run.
-        If we fix a bug in the transformer, we rerun Silver
-        from scratch and overwrite the previous version.
-        Bronze is append-only. Silver is recomputable.
-        This is the key architectural difference.
-        """
-        logger.info("writing_silver_tables")
-
-        (
-            legitimate_df.write
-            .format("delta")
-            .mode("overwrite")
-            .partitionBy("ingestion_date")
-            .save(SILVER_LEGITIMATE_PATH)
+        self.backend_name = (
+            backend_name
+            or resolve_bronze_backend_name()
         )
+
+        self.spark = (
+            spark
+            or get_spark(self.backend_name)
+        )
+
+        self.bronze = BronzeWriter(
+            spark=self.spark,
+            backend_name=self.backend_name,
+        )
+
+        self.silver = build_silver_backend(
+            self.spark,
+            self.backend_name,
+        )
+
+        self.transformer = SilverTransformer()
+
         logger.info(
-            "silver_legitimate_written",
-            path=SILVER_LEGITIMATE_PATH,
+            "silver_pipeline_ready",
+            backend=self.backend_name,
         )
 
-        (
-            fraud_df.write
-            .format("delta")
-            .mode("overwrite")
-            .partitionBy("ingestion_date")
-            .save(SILVER_FRAUD_PATH)
-        )
-        logger.info(
-            "silver_fraud_written",
-            path=SILVER_FRAUD_PATH,
+    def run(self) -> dict[str, int]:
+        bronze_df = self.bronze.read_bronze()
+        bronze_count = bronze_df.count()
+
+        silver_df, quarantine_df = (
+            self.transformer.transform(bronze_df)
         )
 
-        if quarantine_df.count() > 0:
-            (
-                quarantine_df.write
-                .format("delta")
-                .mode("overwrite")
-                .save(SILVER_QUARANTINE_PATH)
-            )
-            logger.info(
-                "silver_quarantine_written",
-                path=SILVER_QUARANTINE_PATH,
+        usable_count = silver_df.count()
+        quarantine_count = quarantine_df.count()
+
+        if bronze_count != usable_count + quarantine_count:
+            raise RuntimeError(
+                "Silver reconciliation failed: "
+                f"bronze={bronze_count}, "
+                f"silver={usable_count}, "
+                f"quarantine={quarantine_count}"
             )
 
-    def run(self):
-        """Full Bronze → Silver pipeline run."""
-        logger.info("silver_ingestion_started")
-
-        # Read
-        bronze_df = self.read_bronze()
-
-        # Transform
-        legitimate_df, fraud_df, quarantine_df = (
-            self.transformer.transform(bronze_df, self.user_profiles)
+        written_silver, written_quarantine = (
+            self.silver.write(
+                silver_df,
+                quarantine_df,
+            )
         )
 
-        # Write
-        self.write_silver(legitimate_df, fraud_df, quarantine_df)
+        result = {
+            "bronze": bronze_count,
+            "silver": usable_count,
+            "quarantine": quarantine_count,
+            "written_silver": written_silver,
+            "written_quarantine": written_quarantine,
+        }
 
         logger.info(
             "silver_ingestion_complete",
-            legitimate=legitimate_df.count(),
-            fraud=fraud_df.count(),
-            quarantined=quarantine_df.count(),
+            backend=self.backend_name,
+            **result,
         )
+
+        return result
 
 
 if __name__ == "__main__":
-    pipeline = SilverIngestionPipeline()
-    pipeline.run()
+    SilverIngestionPipeline().run()

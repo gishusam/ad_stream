@@ -149,3 +149,114 @@ def test_derive_economics_uses_fixed_precision_cpm_semantics(spark):
     assert row.clearing_price_cpm == Decimal("18.000000")
     assert row.impression_spend_cny == Decimal("0.018000000")
     assert row.auction_savings_cpm == Decimal("12.000000")
+
+
+def test_invalid_event_is_routed_to_quarantine(spark):
+    bronze = spark.createDataFrame(
+        [
+            (
+                "ipinyou",
+                "bid-invalid",
+                datetime(2013, 10, 23, 17, 10, 5),
+                None,                  # advertiser_id missing
+                "creative-123",
+                30.0,
+                18.0,
+                "CPM",
+                "exchange-1",
+                "slot-1",
+                "user-1",
+                "desktop",
+                "banner",
+            ),
+            (
+                "ipinyou",
+                "bid-valid",
+                datetime(2013, 10, 23, 17, 10, 6),
+                "2997",
+                "creative-456",
+                30.0,
+                18.0,
+                "CPM",
+                "exchange-1",
+                "slot-2",
+                "user-2",
+                "desktop",
+                "banner",
+            ),
+        ],
+        [
+            "source_dataset",
+            "source_bid_id",
+            "event_timestamp",
+            "advertiser_id",
+            "creative_id",
+            "bid_price_cpm",
+            "clearing_price_cpm",
+            "pricing_basis",
+            "ad_exchange",
+            "slot_id",
+            "user_id",
+            "device_type",
+            "ad_format",
+        ],
+    )
+
+    usable, quarantine = SilverTransformer().classify_quality(bronze)
+
+    assert usable.count() == 1
+    assert quarantine.count() == 1
+
+    invalid = quarantine.first()
+
+    assert invalid.source_bid_id == "bid-invalid"
+    assert invalid.data_quality_status == "INVALID"
+    assert "missing_advertiser_id" in invalid.quality_issues
+
+
+def test_warning_event_stays_usable(spark):
+    bronze = spark.createDataFrame(
+        [
+            (
+                "ipinyou",
+                "bid-warning",
+                datetime(2013, 10, 23, 17, 10, 5),
+                "2997",
+                "creative-123",
+                20.0,
+                25.0,          # clearing price > bid price
+                "CPM",
+                None,          # missing exchange
+                "slot-1",
+                "user-1",
+                "desktop",
+                "banner",
+            ),
+        ],
+        """
+        source_dataset string,
+        source_bid_id string,
+        event_timestamp timestamp,
+        advertiser_id string,
+        creative_id string,
+        bid_price_cpm double,
+        clearing_price_cpm double,
+        pricing_basis string,
+        ad_exchange string,
+        slot_id string,
+        user_id string,
+        device_type string,
+        ad_format string
+        """,
+    )
+
+    usable, quarantine = SilverTransformer().classify_quality(bronze)
+
+    assert usable.count() == 1
+    assert quarantine.count() == 0
+
+    row = usable.first()
+
+    assert row.data_quality_status == "WARNING"
+    assert "clearing_price_exceeds_bid" in row.quality_issues
+    assert "missing_ad_exchange" in row.quality_issues

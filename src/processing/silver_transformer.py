@@ -35,6 +35,67 @@ class SilverTransformer:
     this cleanly. Each method is one responsibility.
     """
 
+    def classify_quality(
+        self,
+        df: DataFrame,
+    ) -> tuple[DataFrame, DataFrame]:
+        """Classify Silver events as VALID, WARNING, or INVALID."""
+        empty = F.expr("array()").cast("array<string>")
+
+        invalid_issues = F.concat(
+            F.when(
+                F.col("advertiser_id").isNull(),
+                F.array(F.lit("missing_advertiser_id")),
+            ).otherwise(empty),
+        )
+
+        warning_issues = F.concat(
+            F.when(
+                F.col("clearing_price_cpm") > F.col("bid_price_cpm"),
+                F.array(F.lit("clearing_price_exceeds_bid")),
+            ).otherwise(empty),
+            F.when(
+                F.col("ad_exchange").isNull(),
+                F.array(F.lit("missing_ad_exchange")),
+            ).otherwise(empty),
+        )
+
+        classified = (
+            df
+            .withColumn("_invalid_issues", invalid_issues)
+            .withColumn("_warning_issues", warning_issues)
+            .withColumn(
+                "quality_issues",
+                F.concat(
+                    F.col("_invalid_issues"),
+                    F.col("_warning_issues"),
+                ),
+            )
+            .withColumn(
+                "data_quality_status",
+                F.when(
+                    F.size(F.col("_invalid_issues")) > 0,
+                    F.lit("INVALID"),
+                )
+                .when(
+                    F.size(F.col("_warning_issues")) > 0,
+                    F.lit("WARNING"),
+                )
+                .otherwise(F.lit("VALID")),
+            )
+            .drop("_invalid_issues", "_warning_issues")
+        )
+
+        usable = classified.filter(
+            F.col("data_quality_status") != "INVALID"
+        )
+
+        quarantine = classified.filter(
+            F.col("data_quality_status") == "INVALID"
+        )
+
+        return usable, quarantine
+
     def derive_economics(self, df: DataFrame) -> DataFrame:
         """Derive fixed-precision RTB auction economics."""
         df = (

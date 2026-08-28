@@ -2,6 +2,8 @@
 
 **An end-to-end data engineering platform for replaying real-world RTB advertising events through a production-style medallion pipeline, serving analytics through FastAPI, and exposing both business metrics and pipeline health in an operational dashboard.**
 
+**203 automated tests · Airflow orchestration · Iceberg lakehouse · FastAPI serving · Pipeline observability**
+
 > **Portfolio scope:** AdStream demonstrates data ingestion, distributed processing, lakehouse storage, data quality, orchestration, analytical serving, API design, observability, testing, and CI. It is not a live demand-side platform (DSP) and does not place bids on production ad exchanges.
 
 ## Overview
@@ -67,6 +69,20 @@ Silver Transformation → Gold Aggregation → Data Quality Check → Serving Re
 ```
 
 Each stage can persist its run ID, status, duration, result metadata and error type to PostgreSQL.
+
+## Product Views
+
+### Analytics Dashboard
+
+The Analytics view surfaces Gold-layer business metrics from the iPinYou RTB pipeline, including spend, impressions, auction savings, traffic quality, advertiser ranking, bid-vs-clearing CPM, and creative performance.
+
+![AdStream Analytics Dashboard](docs/images/analytics-dashboard.png)
+
+### Pipeline Health
+
+The Pipeline Health view exposes operational telemetry from the Airflow pipeline, including the latest run, stage-level status and duration, API health, serving-database readiness, and recent execution history.
+
+![AdStream Pipeline Health Dashboard](docs/images/pipeline-health.png)
 
 ## Data Source — iPinYou RTB
 

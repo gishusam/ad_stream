@@ -168,3 +168,20 @@ def test_traffic_quality_daily_forwards_date_filter():
     assert store.traffic_quality_filters == {
         "event_date": "2026-08-27",
     }
+
+
+def test_query_api_allows_dashboard_origin():
+    client, _ = build_client()
+
+    response = client.get(
+        "/health",
+        headers={
+            "Origin": "http://localhost:8088",
+        },
+    )
+
+    assert response.status_code == 200
+    assert (
+        response.headers["access-control-allow-origin"]
+        == "http://localhost:8088"
+    )

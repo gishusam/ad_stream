@@ -1,8 +1,15 @@
+import os
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import (
+    PythonOperator,
+    get_current_context,
+)
 
+from src.observability.postgres_store import (
+    PostgresPipelineMetricsStore,
+)
 from src.observability.stage import observe_stage
 
 
@@ -25,26 +32,84 @@ def _record_result(stage_observation, result):
         )
 
 
-def run_silver():
-    from src.processing.silver_ingestion import SilverIngestionPipeline
+def _observability_context():
+    context = get_current_context()
+    run_id = context["run_id"]
 
-    with observe_stage("silver") as stage:
+    database_url = os.getenv(
+        "SUPABASE_POSTGRES_URL"
+    )
+
+    if not database_url:
+        return run_id, None
+
+    metrics_store = PostgresPipelineMetricsStore(
+        database_url
+    )
+
+    return run_id, metrics_store
+
+
+def run_silver():
+    from src.processing.silver_ingestion import (
+        SilverIngestionPipeline,
+    )
+
+    run_id, metrics_store = _observability_context()
+
+    recorder = (
+        metrics_store.record_stage
+        if metrics_store is not None
+        else None
+    )
+
+    with observe_stage(
+        "silver",
+        run_id=run_id,
+        recorder=recorder,
+    ) as stage:
         result = SilverIngestionPipeline().run()
-        _record_result(stage, result)
+
+        _record_result(
+            stage,
+            result,
+        )
+
         return result
 
 
 def run_gold():
-    from src.processing.gold_ingestion import GoldIngestionPipeline
+    from src.processing.gold_ingestion import (
+        GoldIngestionPipeline,
+    )
 
-    with observe_stage("gold") as stage:
+    run_id, metrics_store = _observability_context()
+
+    recorder = (
+        metrics_store.record_stage
+        if metrics_store is not None
+        else None
+    )
+
+    with observe_stage(
+        "gold",
+        run_id=run_id,
+        recorder=recorder,
+    ) as stage:
         result = GoldIngestionPipeline().run()
-        _record_result(stage, result)
+
+        _record_result(
+            stage,
+            result,
+        )
+
         return result
 
 
 def run_quality(ti):
-    from src.processing.data_quality import validate_pipeline_results
+    from src.processing.data_quality import (
+        validate_pipeline_results,
+    )
 
     silver_result = ti.xcom_pull(
         task_ids="silver_transformation"
@@ -53,7 +118,19 @@ def run_quality(ti):
         task_ids="gold_aggregation"
     )
 
-    with observe_stage("quality") as stage:
+    run_id, metrics_store = _observability_context()
+
+    recorder = (
+        metrics_store.record_stage
+        if metrics_store is not None
+        else None
+    )
+
+    with observe_stage(
+        "quality",
+        run_id=run_id,
+        recorder=recorder,
+    ) as stage:
         result = validate_pipeline_results(
             silver_result,
             gold_result,
@@ -61,12 +138,10 @@ def run_quality(ti):
 
         if isinstance(result, dict):
             stage.set_result(
-                status="passed",
                 **result,
             )
         else:
             stage.set_result(
-                status="passed",
                 result_type=type(result).__name__,
             )
 
@@ -74,11 +149,30 @@ def run_quality(ti):
 
 
 def run_serving():
-    from src.serving.pipeline import ServingPipeline
+    from src.serving.pipeline import (
+        ServingPipeline,
+    )
 
-    with observe_stage("serving") as stage:
+    run_id, metrics_store = _observability_context()
+
+    recorder = (
+        metrics_store.record_stage
+        if metrics_store is not None
+        else None
+    )
+
+    with observe_stage(
+        "serving",
+        run_id=run_id,
+        recorder=recorder,
+    ) as stage:
         result = ServingPipeline().run()
-        _record_result(stage, result)
+
+        _record_result(
+            stage,
+            result,
+        )
+
         return result
 
 

@@ -387,12 +387,547 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+/* ─────────────────────────────────────────────
+   Application shell / sidebar
+───────────────────────────────────────────── */
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 28px 18px;
+
+  background: #090912;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-brand {
+  padding: 0 10px 28px;
+}
+
+.sidebar-brand-title {
+  font-family: var(--head);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+
+  background: linear-gradient(
+    120deg,
+    var(--green),
+    var(--blue)
+  );
+
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.sidebar-brand-sub {
+  margin-top: 5px;
+
+  color: var(--muted);
+
+  font-size: .56rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 24px;
+}
+
+.sidebar-section-title {
+  padding: 0 10px 8px;
+
+  color: #45455e;
+
+  font-size: .54rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 11px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: var(--muted);
+
+  font-family: var(--mono);
+  font-size: .67rem;
+
+  cursor: pointer;
+  text-align: left;
+
+  transition:
+    background .15s ease,
+    color .15s ease;
+}
+
+.nav-item:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.nav-item.active {
+  color: var(--green);
+  background: rgba(0,229,160,.07);
+}
+
+.nav-icon {
+  width: 18px;
+  text-align: center;
+}
+
+.sidebar-system {
+  margin-top: auto;
+
+  padding: 16px 10px 0;
+
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-system-title {
+  margin-bottom: 12px;
+
+  color: #45455e;
+
+  font-size: .54rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.sidebar-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  margin-bottom: 9px;
+
+  color: var(--muted);
+  font-size: .61rem;
+}
+
+.sidebar-status-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: var(--muted);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--muted);
+}
+
+.status-dot.healthy {
+  background: var(--green);
+
+  box-shadow:
+    0 0 8px rgba(0,229,160,.6);
+}
+
+.status-dot.failed {
+  background: var(--red);
+
+  box-shadow:
+    0 0 8px rgba(255,77,109,.45);
+}
+
+.main-content {
+  min-width: 0;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+
+/* ─────────────────────────────────────────────
+   Pipeline Health
+───────────────────────────────────────────── */
+
+.health-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 20px;
+
+  padding-bottom: 26px;
+  margin-bottom: 28px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.health-title h2 {
+  font-family: var(--head);
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+
+.health-title p {
+  margin-top: 7px;
+
+  color: var(--muted);
+
+  font-size: .68rem;
+}
+
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 7px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 100px;
+
+  background: var(--surface);
+
+  color: var(--muted);
+
+  font-size: .6rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.health-summary {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+
+  gap: 14px;
+
+  margin-bottom: 16px;
+}
+
+.health-card {
+  min-height: 112px;
+
+  padding: 19px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+
+.health-card-value {
+  margin-top: 10px;
+
+  font-family: var(--head);
+  font-size: 1.45rem;
+  font-weight: 700;
+
+  word-break: break-word;
+}
+
+.health-card-value.small {
+  font-family: var(--mono);
+  font-size: .8rem;
+  line-height: 1.5;
+}
+
+.pipeline-stage-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 12px;
+}
+
+.stage-card {
+  position: relative;
+
+  padding: 18px;
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.stage-card.success {
+  border-color: rgba(0,229,160,.18);
+}
+
+.stage-card.failed {
+  border-color: rgba(255,77,109,.22);
+}
+
+.stage-name {
+  color: var(--muted);
+
+  font-size: .58rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.stage-status {
+  margin-top: 10px;
+
+  font-family: var(--head);
+  font-size: .95rem;
+  font-weight: 700;
+}
+
+.stage-duration {
+  margin-top: 5px;
+
+  color: var(--muted);
+  font-size: .62rem;
+}
+
+.stage-result {
+  margin-top: 10px;
+
+  color: #85859c;
+  font-size: .57rem;
+  line-height: 1.6;
+}
+
+.pipeline-empty {
+  padding: 50px 20px;
+
+  text-align: center;
+
+  color: var(--muted);
+
+  font-size: .72rem;
+}
+
+.run-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  font-size: .65rem;
+}
+
+.run-status.success {
+  color: var(--green);
+}
+
+.run-status.failed {
+  color: var(--red);
+}
+
+.run-status-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.pipeline-health-error {
+  display: none;
+
+  margin-bottom: 18px;
+  padding: 13px 15px;
+
+  border: 1px solid rgba(255,77,109,.25);
+  border-radius: 8px;
+
+  background: rgba(255,77,109,.06);
+  color: var(--red);
+
+  font-size: .7rem;
+}
+
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: relative;
+
+    width: 100%;
+    height: auto;
+
+    flex-direction: row;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 18px;
+
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-brand {
+    padding: 0;
+    margin-right: 10px;
+  }
+
+  .sidebar-brand-sub,
+  .sidebar-section-title,
+  .sidebar-system {
+    display: none;
+  }
+
+  .sidebar-section {
+    display: flex;
+
+    gap: 6px;
+
+    margin: 0;
+  }
+
+  .nav-item {
+    width: auto;
+  }
+
+  .health-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .pipeline-stage-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+@media (max-width: 620px) {
+  .sidebar-brand {
+    display: none;
+  }
+
+  .pipeline-stage-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
 </head>
 
 <body>
 
+<div class="app-shell">
+
+<aside class="sidebar">
+
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-title">
+      AdStream
+    </div>
+
+    <div class="sidebar-brand-sub">
+      Data Platform
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+
+    <div class="sidebar-section-title">
+      Overview
+    </div>
+
+    <button
+      class="nav-item active"
+      id="nav-analytics"
+      type="button"
+      onclick="showView('analytics')"
+    >
+      <span class="nav-icon">▣</span>
+      <span>Analytics</span>
+    </button>
+
+  </div>
+
+  <div class="sidebar-section">
+
+    <div class="sidebar-section-title">
+      Operations
+    </div>
+
+    <button
+      class="nav-item"
+      id="nav-pipeline-health"
+      type="button"
+      onclick="showView('pipeline-health')"
+    >
+      <span class="nav-icon">◉</span>
+      <span>Pipeline Health</span>
+    </button>
+
+  </div>
+
+  <div class="sidebar-system">
+
+    <div class="sidebar-system-title">
+      System
+    </div>
+
+    <div class="sidebar-status">
+      <span>API</span>
+
+      <span
+        class="sidebar-status-value"
+        id="sidebar-api-status"
+      >
+        <span class="status-dot"></span>
+        Checking
+      </span>
+    </div>
+
+    <div class="sidebar-status">
+      <span>Serving DB</span>
+
+      <span
+        class="sidebar-status-value"
+        id="sidebar-db-status"
+      >
+        <span class="status-dot"></span>
+        Checking
+      </span>
+    </div>
+
+  </div>
+
+</aside>
+
+<main class="main-content">
+
 <div class="page">
+
+<div
+  id="analytics-view"
+  class="view active"
+>
 
 <header>
   <div class="brand">
@@ -550,10 +1085,172 @@ footer {
 
 </section>
 
+</div>
+
+<div
+  id="pipeline-health-view"
+  class="view"
+>
+
+  <div class="health-header">
+
+    <div class="health-title">
+      <h2>Pipeline Health</h2>
+
+      <p>
+        Execution health, stage performance and recent
+        AdStream pipeline runs.
+      </p>
+    </div>
+
+    <div class="health-badge">
+      <span class="dot"></span>
+      Operational telemetry
+    </div>
+
+  </div>
+
+  <div
+    id="pipeline-health-error"
+    class="pipeline-health-error"
+  >
+    Pipeline health data is currently unavailable.
+  </div>
+
+  <section class="health-summary">
+
+    <div class="health-card">
+      <div class="label">
+        Latest Run
+      </div>
+
+      <div
+        class="health-card-value small"
+        id="pipeline-run-id"
+      >
+        —
+      </div>
+
+      <div class="sub">
+        Airflow run identifier
+      </div>
+    </div>
+
+    <div class="health-card">
+      <div class="label">
+        Run Status
+      </div>
+
+      <div
+        class="health-card-value"
+        id="pipeline-run-status"
+      >
+        —
+      </div>
+
+      <div class="sub">
+        Latest persisted pipeline outcome
+      </div>
+    </div>
+
+    <div class="health-card">
+      <div class="label">
+        Total Duration
+      </div>
+
+      <div
+        class="health-card-value"
+        id="pipeline-duration"
+      >
+        —
+      </div>
+
+      <div class="sub">
+        Sum of observed stage durations
+      </div>
+    </div>
+
+  </section>
+
+  <section class="panel">
+
+    <div class="panel-head">
+      <span class="panel-title">
+        Stage Execution
+      </span>
+
+      <span class="tag">
+        Silver → Gold → Quality → Serving
+      </span>
+    </div>
+
+    <div
+      class="pipeline-stage-grid"
+      id="pipeline-stages"
+    >
+      <div class="pipeline-empty">
+        No pipeline runs recorded yet.
+      </div>
+    </div>
+
+  </section>
+
+  <section
+    class="panel"
+    style="margin-top:16px"
+  >
+
+    <div class="panel-head">
+      <span class="panel-title">
+        Recent Pipeline Runs
+      </span>
+
+      <span class="tag">
+        persisted observability
+      </span>
+    </div>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Run ID</th>
+            <th>Status</th>
+            <th>Duration</th>
+            <th>Recorded</th>
+          </tr>
+        </thead>
+
+        <tbody id="pipeline-recent-runs">
+          <tr>
+            <td
+              colspan="4"
+              class="empty"
+            >
+              No pipeline runs recorded yet.
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>
+
+
 <footer>
   <span>AdStream · Medallion RTB Analytics</span>
   <span>Kafka · Spark · Iceberg · Supabase · FastAPI</span>
 </footer>
+
+</div>
+
+</main>
 
 </div>
 
@@ -872,6 +1569,378 @@ function renderCreativeTable(rows) {
     ).join("");
 }
 
+function showView(view) {
+  const analyticsView =
+    document.getElementById("analytics-view");
+
+  const pipelineView =
+    document.getElementById("pipeline-health-view");
+
+  const analyticsNav =
+    document.getElementById("nav-analytics");
+
+  const pipelineNav =
+    document.getElementById("nav-pipeline-health");
+
+  const isPipeline =
+    view === "pipeline-health";
+
+  analyticsView.classList.toggle(
+    "active",
+    !isPipeline
+  );
+
+  pipelineView.classList.toggle(
+    "active",
+    isPipeline
+  );
+
+  analyticsNav.classList.toggle(
+    "active",
+    !isPipeline
+  );
+
+  pipelineNav.classList.toggle(
+    "active",
+    isPipeline
+  );
+
+  if (isPipeline) {
+    loadPipelineHealth();
+  }
+}
+
+
+function setSidebarHealth(
+  elementId,
+  status,
+  healthyText,
+  failedText
+) {
+  const element =
+    document.getElementById(elementId);
+
+  const healthy =
+    status === "healthy"
+    || status === "ready";
+
+  element.innerHTML = `
+    <span class="status-dot ${
+      healthy ? "healthy" : "failed"
+    }"></span>
+    ${healthy ? healthyText : failedText}
+  `;
+}
+
+
+function formatDuration(durationMs) {
+  const value = Number(durationMs || 0);
+
+  if (value < 1000) {
+    return `${value.toFixed(0)} ms`;
+  }
+
+  return `${(value / 1000).toFixed(2)} s`;
+}
+
+
+function formatRecordedAt(value) {
+  if (!value) {
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString();
+}
+
+
+function renderStageResult(result) {
+  if (!result) {
+    return "";
+  }
+
+  const entries =
+    Object.entries(result)
+      .filter(
+        ([, value]) =>
+          value !== null
+          && value !== undefined
+      )
+      .slice(0, 4);
+
+  if (!entries.length) {
+    return "";
+  }
+
+  return entries
+    .map(
+      ([key, value]) =>
+        `${key}: ${value}`
+    )
+    .join("<br>");
+}
+
+
+function renderPipelineStages(stages) {
+  const container =
+    document.getElementById(
+      "pipeline-stages"
+    );
+
+  if (!stages.length) {
+    container.innerHTML = `
+      <div class="pipeline-empty">
+        No pipeline runs recorded yet.
+      </div>
+    `;
+
+    return;
+  }
+
+  const preferredOrder = [
+    "silver",
+    "gold",
+    "quality",
+    "serving"
+  ];
+
+  const sorted = [...stages].sort(
+    (a, b) =>
+      preferredOrder.indexOf(a.stage)
+      - preferredOrder.indexOf(b.stage)
+  );
+
+  container.innerHTML =
+    sorted.map(stage => {
+      const success =
+        stage.status === "success";
+
+      return `
+        <div
+          class="stage-card ${
+            success ? "success" : "failed"
+          }"
+        >
+          <div class="stage-name">
+            ${stage.stage}
+          </div>
+
+          <div
+            class="stage-status ${
+              success ? "c-green" : "c-red"
+            }"
+          >
+            ${success ? "✓ Success" : "✕ Failed"}
+          </div>
+
+          <div class="stage-duration">
+            ${formatDuration(stage.duration_ms)}
+          </div>
+
+          <div class="stage-result">
+            ${
+              renderStageResult(stage.result)
+              || (
+                stage.error_type
+                  ? `error: ${stage.error_type}`
+                  : "Stage completed"
+              )
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
+}
+
+
+function renderRecentRuns(runs) {
+  const tbody =
+    document.getElementById(
+      "pipeline-recent-runs"
+    );
+
+  if (!runs.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty"
+        >
+          No pipeline runs recorded yet.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    runs.map(run => {
+      const success =
+        run.status === "success";
+
+      return `
+        <tr>
+          <td>${run.run_id}</td>
+
+          <td>
+            <span
+              class="run-status ${
+                success ? "success" : "failed"
+              }"
+            >
+              <span class="run-status-dot"></span>
+
+              ${
+                success
+                  ? "Success"
+                  : "Failed"
+              }
+            </span>
+          </td>
+
+          <td>
+            ${formatDuration(run.duration_ms)}
+          </td>
+
+          <td>
+            ${formatRecordedAt(run.recorded_at)}
+          </td>
+        </tr>
+      `;
+    }).join("");
+}
+
+
+async function loadPipelineHealth() {
+  const errorBox =
+    document.getElementById(
+      "pipeline-health-error"
+    );
+
+  try {
+    const response = await fetch(
+      `${API}/api/v1/pipeline-health`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "Pipeline Health API returned "
+        + response.status
+      );
+    }
+
+    const data =
+      await response.json();
+
+    errorBox.style.display = "none";
+
+    setSidebarHealth(
+      "sidebar-api-status",
+      data.system.api,
+      "Healthy",
+      "Unavailable"
+    );
+
+    setSidebarHealth(
+      "sidebar-db-status",
+      data.system.serving_database,
+      "Ready",
+      "Unavailable"
+    );
+
+    if (!data.latest_run) {
+      document.getElementById(
+        "pipeline-run-id"
+      ).textContent = "No runs";
+
+      document.getElementById(
+        "pipeline-run-status"
+      ).textContent = "—";
+
+      document.getElementById(
+        "pipeline-duration"
+      ).textContent = "—";
+
+      renderPipelineStages([]);
+      renderRecentRuns([]);
+
+      return;
+    }
+
+    document.getElementById(
+      "pipeline-run-id"
+    ).textContent =
+      data.latest_run.run_id;
+
+    const runStatus =
+      document.getElementById(
+        "pipeline-run-status"
+      );
+
+    const successful =
+      data.latest_run.status === "success";
+
+    runStatus.textContent =
+      successful
+        ? "Success"
+        : "Failed";
+
+    runStatus.className =
+      "health-card-value "
+      + (
+        successful
+          ? "c-green"
+          : "c-red"
+      );
+
+    document.getElementById(
+      "pipeline-duration"
+    ).textContent =
+      formatDuration(
+        data.latest_run.duration_ms
+      );
+
+    renderPipelineStages(
+      data.stages || []
+    );
+
+    renderRecentRuns(
+      data.recent_runs || []
+    );
+  }
+  catch (error) {
+    console.error(
+      "Pipeline Health API error:",
+      error
+    );
+
+    errorBox.style.display =
+      "block";
+
+    setSidebarHealth(
+      "sidebar-api-status",
+      "failed",
+      "Healthy",
+      "Unavailable"
+    );
+
+    setSidebarHealth(
+      "sidebar-db-status",
+      "failed",
+      "Ready",
+      "Unavailable"
+    );
+  }
+}
+
+
+
 async function loadDashboard() {
   const errorBox =
     document.getElementById("api-error");
@@ -935,6 +2004,7 @@ async function loadDashboard() {
 }
 
 loadDashboard();
+loadPipelineHealth();
 </script>
 
 </body>

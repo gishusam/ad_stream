@@ -1,14 +1,29 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.serving.postgres_store import PostgresServingStore
+
+
+DASHBOARD_ORIGINS = [
+    "http://localhost:8088",
+    "http://127.0.0.1:8088",
+]
 
 
 def create_app(serving_store=None) -> FastAPI:
     app = FastAPI(
         title="AdStream Query API",
         version="1.0.0",
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=DASHBOARD_ORIGINS,
+        allow_credentials=False,
+        allow_methods=["GET"],
+        allow_headers=["*"],
     )
 
     store = serving_store

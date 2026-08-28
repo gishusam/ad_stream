@@ -1,9 +1,16 @@
+import logging
 import os
+import time
+import uuid
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from src.serving.postgres_store import PostgresServingStore
+
+
+logger = logging.getLogger("adstream.api")
 
 
 DASHBOARD_ORIGINS = [
@@ -39,9 +46,67 @@ def create_app(serving_store=None) -> FastAPI:
 
         store = PostgresServingStore(database_url)
 
+    @app.middleware("http")
+    async def request_observability(request, call_next):
+        request_id = (
+            request.headers.get("X-Request-ID")
+            or str(uuid.uuid4())
+        )
+
+        started = time.perf_counter()
+
+        response = await call_next(request)
+
+        duration_ms = (
+            time.perf_counter() - started
+        ) * 1000
+
+        response.headers["X-Request-ID"] = request_id
+        response.headers["X-Process-Time-Ms"] = (
+            f"{duration_ms:.3f}"
+        )
+
+        logger.info(
+            "http_request "
+            "request_id=%s "
+            "method=%s "
+            "path=%s "
+            "status=%s "
+            "duration_ms=%.3f",
+            request_id,
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+        )
+
+        return response
+
     @app.get("/health")
     def health():
         return {"status": "ok"}
+
+    @app.get("/ready")
+    def ready():
+        try:
+            store.ping()
+        except Exception:
+            logger.exception(
+                "serving_database_readiness_failed"
+            )
+
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "status": "not_ready",
+                    "serving_database": "unavailable",
+                },
+            )
+
+        return {
+            "status": "ready",
+            "serving_database": "ok",
+        }
 
     @app.get("/api/v1/advertisers/daily")
     def advertiser_daily(

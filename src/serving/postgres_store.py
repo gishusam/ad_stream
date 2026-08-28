@@ -18,6 +18,12 @@ class PostgresServingStore:
         self.database_url = database_url
         self.schema = schema
 
+    def ping(self) -> bool:
+        with psycopg.connect(self.database_url) as conn:
+            conn.execute("SELECT 1")
+
+        return True
+
     def replace_advertiser_daily(self, rows: list[dict]) -> None:
         with psycopg.connect(self.database_url) as conn:
             conn.execute(

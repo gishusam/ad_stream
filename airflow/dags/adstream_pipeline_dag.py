@@ -38,6 +38,12 @@ def run_quality(ti):
     )
 
 
+def run_serving():
+    from src.serving.pipeline import ServingPipeline
+
+    return ServingPipeline().run()
+
+
 with DAG(
     dag_id="adstream_medallion_pipeline",
     default_args=default_args,
@@ -62,4 +68,9 @@ with DAG(
         python_callable=run_quality,
     )
 
-    silver_task >> gold_task >> quality_task
+    serving_task = PythonOperator(
+        task_id="serving_refresh",
+        python_callable=run_serving,
+    )
+
+    silver_task >> gold_task >> quality_task >> serving_task
